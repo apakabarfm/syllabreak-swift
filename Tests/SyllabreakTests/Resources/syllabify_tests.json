@@ -35,28 +35,28 @@
       "lang": "rus",
       "cases": [
         {
-          "text": "\u043f\u0440\u0438\u0432\u0435\u0442",
-          "want": "\u043f\u0440\u0438-\u0432\u0435\u0442"
+          "text": "привет",
+          "want": "при-вет"
         },
         {
-          "text": "\u043c\u0438\u0440",
-          "want": "\u043c\u0438\u0440"
+          "text": "мир",
+          "want": "мир"
         },
         {
-          "text": "\u043a\u043e\u043c\u043f\u044c\u044e\u0442\u0435\u0440",
-          "want": "\u043a\u043e\u043c-\u043f\u044c\u044e-\u0442\u0435\u0440"
+          "text": "компьютер",
+          "want": "ком-пью-тер"
         },
         {
-          "text": "\u043a\u0440\u0430\u0441\u0438\u0432\u044b\u0439",
-          "want": "\u043a\u0440\u0430-\u0441\u0438-\u0432\u044b\u0439"
+          "text": "красивый",
+          "want": "кра-си-вый"
         },
         {
-          "text": "\u0448\u043a\u043e\u043b\u0430",
-          "want": "\u0448\u043a\u043e-\u043b\u0430"
+          "text": "школа",
+          "want": "шко-ла"
         },
         {
-          "text": "\u043c\u0430\u043b\u044c\u0447\u0438\u043a",
-          "want": "\u043c\u0430\u043b\u044c-\u0447\u0438\u043a"
+          "text": "мальчик",
+          "want": "маль-чик"
         }
       ]
     },
@@ -65,28 +65,28 @@
       "lang": "srp-cyrl",
       "cases": [
         {
-          "text": "\u0437\u0434\u0440\u0430\u0432\u043e",
-          "want": "\u0437\u0434\u0440\u0430-\u0432\u043e"
+          "text": "здраво",
+          "want": "здра-во"
         },
         {
-          "text": "\u0440\u0430\u0447\u0443\u043d\u0430\u0440",
-          "want": "\u0440\u0430-\u0447\u0443-\u043d\u0430\u0440"
+          "text": "рачунар",
+          "want": "ра-чу-нар"
         },
         {
-          "text": "\u0443\u0447\u0438\u0442\u0435\u0459",
-          "want": "\u0443-\u0447\u0438-\u0442\u0435\u0459"
+          "text": "учитељ",
+          "want": "у-чи-тељ"
         },
         {
-          "text": "\u0452\u0430\u043a",
-          "want": "\u0452\u0430\u043a"
+          "text": "ђак",
+          "want": "ђак"
         },
         {
-          "text": "\u045a\u0435\u0433\u043e\u0432",
-          "want": "\u045a\u0435-\u0433\u043e\u0432"
+          "text": "његов",
+          "want": "ње-гов"
         },
         {
-          "text": "\u0442\u0440\u0433",
-          "want": "\u0442\u0440\u0433"
+          "text": "трг",
+          "want": "трг"
         }
       ]
     },
@@ -99,20 +99,20 @@
           "want": "zdra-vo"
         },
         {
-          "text": "ra\u010dunar",
-          "want": "ra-\u010du-nar"
+          "text": "računar",
+          "want": "ra-ču-nar"
         },
         {
-          "text": "u\u010ditelj",
-          "want": "u-\u010di-telj"
+          "text": "učitelj",
+          "want": "u-či-telj"
         },
         {
-          "text": "\u010dovek",
-          "want": "\u010do-vek"
+          "text": "čovek",
+          "want": "čo-vek"
         },
         {
-          "text": "\u0161uma",
-          "want": "\u0161u-ma"
+          "text": "šuma",
+          "want": "šu-ma"
         },
         {
           "text": "njegov",
@@ -125,16 +125,16 @@
       "lang": null,
       "cases": [
         {
-          "text": "\u010dovek",
-          "want": "\u010do-vek"
+          "text": "čovek",
+          "want": "čo-vek"
         },
         {
-          "text": "\u0161uma",
-          "want": "\u0161u-ma"
+          "text": "šuma",
+          "want": "šu-ma"
         },
         {
-          "text": "u\u010ditelj",
-          "want": "u-\u010di-telj"
+          "text": "učitelj",
+          "want": "u-či-telj"
         }
       ]
     },

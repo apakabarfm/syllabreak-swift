@@ -14,9 +14,11 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "Syllabreak"),
+            name: "Syllabreak",
+            resources: [.process("Resources")]),
         .testTarget(
             name: "SyllabreakTests",
-            dependencies: ["Syllabreak"]),
+            dependencies: ["Syllabreak"],
+            resources: [.process("Resources")]),
     ]
 )
