@@ -1,0 +1,13 @@
+disabled_rules:
+  - trailing_comma
+  - line_length
+  - large_tuple
+  - identifier_name
+
+included:
+  - Sources
+  - Tests
+
+excluded:
+  - .build
+  - Package.swift

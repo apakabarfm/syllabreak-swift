@@ -11,6 +11,7 @@ test:
 	swift test
 
 lint:
+	swiftlint --fix
 	swiftlint
 
 clean:

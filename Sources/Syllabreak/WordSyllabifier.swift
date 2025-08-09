@@ -1,0 +1,170 @@
+import Foundation
+
+class WordSyllabifier {
+    private let word: String
+    private let rule: LanguageRule
+    private let softHyphen: String
+    private let tokens: [Token]
+    private let nuclei: [Int]
+
+    init(word: String, rule: LanguageRule, softHyphen: String) {
+        self.word = word
+        self.rule = rule
+        self.softHyphen = softHyphen
+        self.tokens = WordSyllabifier.tokenize(word: word, rule: rule)
+        self.nuclei = WordSyllabifier.findNuclei(tokens: tokens, rule: rule)
+    }
+
+    private static func tokenize(word: String, rule: LanguageRule) -> [Token] {
+        let tokenizer = Tokenizer(word: word, rule: rule)
+        return tokenizer.tokenize()
+    }
+
+    private static func findNuclei(tokens: [Token], rule: LanguageRule) -> [Int] {
+        var nuclei: [Int] = []
+
+        // First look for vowels
+        for (i, token) in tokens.enumerated() {
+            if token.tokenClass == .vowel {
+                nuclei.append(i)
+            }
+        }
+
+        if !nuclei.isEmpty {
+            return nuclei
+        }
+
+        // If no vowels, look for syllabic consonants
+        for (i, token) in tokens.enumerated() {
+            if token.tokenClass == .consonant &&
+               token.surface.count == 1 &&
+               rule.syllabicConsonantSet.contains(Character(token.surface.lowercased())) {
+                nuclei.append(i)
+            }
+        }
+
+        return nuclei
+    }
+
+    private func skipSeparatorsForward(_ start: Int) -> Int {
+        var pos = start
+        while pos < tokens.count && tokens[pos].tokenClass == .separator {
+            pos += 1
+        }
+        return pos
+    }
+
+    private func skipSeparatorsBackward(_ start: Int) -> Int {
+        var pos = start
+        while pos >= 0 && tokens[pos].tokenClass == .separator {
+            pos -= 1
+        }
+        return pos
+    }
+
+    private func extractConsonantCluster(left: Int, right: Int) -> ([Token], [Int]) {
+        var cluster: [Token] = []
+        var clusterIndices: [Int] = []
+
+        for i in left...right {
+            if i < tokens.count && tokens[i].tokenClass == .consonant {
+                cluster.append(tokens[i])
+                clusterIndices.append(i)
+            }
+        }
+
+        return (cluster, clusterIndices)
+    }
+
+    private func findClusterBetweenNuclei(nk: Int, nk1: Int) -> ([Token], [Int]) {
+        let left = skipSeparatorsForward(nk + 1)
+        let right = skipSeparatorsBackward(nk1 - 1)
+
+        if left > right {
+            return ([], [])
+        }
+
+        return extractConsonantCluster(left: left, right: right)
+    }
+
+    private func isValidOnset(_ consonant1: String, _ consonant2: String) -> Bool {
+        let onsetCandidate = consonant1.lowercased() + consonant2.lowercased()
+        return rule.clustersKeepNextSet.contains(onsetCandidate)
+    }
+
+    private func findBoundaryForSingleConsonant(_ clusterIndices: [Int]) -> Int {
+        // V-CV: boundary before single consonant
+        return clusterIndices[0]
+    }
+
+    private func findBoundaryForTwoConsonants(_ cluster: [Token], _ clusterIndices: [Int]) -> Int {
+        // Determine boundary for two-consonant cluster
+        if isValidOnset(cluster[0].surface, cluster[1].surface) {
+            return clusterIndices[0]
+        } else {
+            return clusterIndices[1]
+        }
+    }
+
+    private func findBoundaryForLongCluster(_ cluster: [Token], _ clusterIndices: [Int]) -> Int {
+        // Determine boundary for cluster with 3+ consonants
+        var boundaryIdx = clusterIndices[clusterIndices.count - 1]
+
+        if cluster.count >= 2 && isValidOnset(cluster[cluster.count - 2].surface, cluster[cluster.count - 1].surface) {
+            boundaryIdx = clusterIndices[clusterIndices.count - 2]
+        }
+
+        return boundaryIdx
+    }
+
+    private func findBoundaryInCluster(_ cluster: [Token], _ clusterIndices: [Int]) -> Int? {
+        // Determine where to place boundary in a consonant cluster
+        if cluster.isEmpty {
+            return nil
+        } else if cluster.count == 1 {
+            return findBoundaryForSingleConsonant(clusterIndices)
+        } else if cluster.count == 2 {
+            return findBoundaryForTwoConsonants(cluster, clusterIndices)
+        } else {
+            return findBoundaryForLongCluster(cluster, clusterIndices)
+        }
+    }
+
+    private func placeBoundaries() -> [Int] {
+        // Determine syllable boundaries between nuclei
+        var boundaries: [Int] = []
+
+        for k in 0..<(nuclei.count - 1) {
+            let (cluster, clusterIndices) = findClusterBetweenNuclei(nk: nuclei[k], nk1: nuclei[k + 1])
+            if let boundary = findBoundaryInCluster(cluster, clusterIndices) {
+                boundaries.append(boundary)
+            }
+        }
+
+        return boundaries
+    }
+
+    func syllabify() -> String {
+        // Perform syllabification and return the word with soft hyphens
+        if nuclei.count < 2 {
+            return word
+        }
+
+        let boundaries = placeBoundaries()
+        if boundaries.isEmpty {
+            return word
+        }
+
+        var result: [String] = []
+        let boundarySet = Set(boundaries)
+
+        for (i, token) in tokens.enumerated() {
+            if boundarySet.contains(i) {
+                result.append(softHyphen)
+            }
+            result.append(token.surface)
+        }
+
+        return result.joined()
+    }
+}
