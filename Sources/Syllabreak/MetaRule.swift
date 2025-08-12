@@ -1,23 +1,21 @@
 import Foundation
 
-class MetaRule {
-    var rules: [LanguageRule]
+final class MetaRule: Sendable {
+    let rules: [LanguageRule]
 
     init(rules: [LanguageRule]) {
-        self.rules = rules
-        calculateUniqueChars()
-    }
-
-    private func calculateUniqueChars() {
-        for i in 0..<rules.count {
-            var uniqueChars = rules[i].allChars
-            for j in 0..<rules.count {
+        // Calculate unique chars before storing
+        var mutableRules = rules
+        for i in 0..<mutableRules.count {
+            var uniqueChars = mutableRules[i].allChars
+            for j in 0..<mutableRules.count {
                 if i != j {
-                    uniqueChars.subtract(rules[j].allChars)
+                    uniqueChars.subtract(mutableRules[j].allChars)
                 }
             }
-            rules[i].uniqueChars = uniqueChars
+            mutableRules[i].uniqueChars = uniqueChars
         }
+        self.rules = mutableRules
     }
 
     func getAllKnownChars() -> Set<Character> {

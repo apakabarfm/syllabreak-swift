@@ -1,6 +1,6 @@
 import Foundation
 
-struct LanguageRule: Codable {
+struct LanguageRule: Codable, Sendable {
     let lang: String
     let vowels: String
     let consonants: String

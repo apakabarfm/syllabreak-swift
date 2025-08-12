@@ -1,6 +1,6 @@
 import Foundation
 
-public class Syllabreak {
+public final class Syllabreak: Sendable {
     public static let defaultSoftHyphen = "\u{00AD}"
     private let softHyphen: String
     private let metaRule: MetaRule
