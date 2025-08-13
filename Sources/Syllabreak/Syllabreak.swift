@@ -35,10 +35,8 @@ public final class Syllabreak: Sendable {
     }
 
     private func getRuleByLang(_ lang: String) -> LanguageRule? {
-        for rule in metaRule.rules {
-            if rule.lang == lang {
-                return rule
-            }
+        for rule in metaRule.rules where rule.lang == lang {
+            return rule
         }
         return nil
     }

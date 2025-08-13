@@ -8,10 +8,8 @@ final class MetaRule: Sendable {
         var mutableRules = rules
         for i in 0..<mutableRules.count {
             var uniqueChars = mutableRules[i].allChars
-            for j in 0..<mutableRules.count {
-                if i != j {
-                    uniqueChars.subtract(mutableRules[j].allChars)
-                }
+            for j in 0..<mutableRules.count where i != j {
+                uniqueChars.subtract(mutableRules[j].allChars)
             }
             mutableRules[i].uniqueChars = uniqueChars
         }

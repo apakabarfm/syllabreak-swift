@@ -59,7 +59,7 @@ struct LanguageRule: Codable, Sendable {
     var modifiersSeparatorsSet: Set<Character> {
         Set(modifiersSeparators ?? "")
     }
-    
+
     var clustersOnlyAfterLongSet: Set<String> {
         Set(clustersOnlyAfterLong ?? [])
     }

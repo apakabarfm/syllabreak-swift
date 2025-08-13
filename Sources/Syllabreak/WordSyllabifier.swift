@@ -24,10 +24,8 @@ class WordSyllabifier {
         var nuclei: [Int] = []
 
         // First look for vowels
-        for (i, token) in tokens.enumerated() {
-            if token.tokenClass == .vowel {
-                nuclei.append(i)
-            }
+        for (i, token) in tokens.enumerated() where token.tokenClass == .vowel {
+            nuclei.append(i)
         }
 
         if !nuclei.isEmpty {
@@ -89,7 +87,7 @@ class WordSyllabifier {
 
     private func isValidOnset(_ consonant1: String, _ consonant2: String, prevNucleusIdx: Int? = nil) -> Bool {
         let onsetCandidate = consonant1.lowercased() + consonant2.lowercased()
-        
+
         // Check if this cluster requires a long vowel before it
         if rule.clustersOnlyAfterLongSet.contains(onsetCandidate), let prevIdx = prevNucleusIdx {
             // Check if previous nucleus is long (digraph or marked as long)
@@ -97,21 +95,21 @@ class WordSyllabifier {
                 return false
             }
         }
-        
+
         return rule.clustersKeepNextSet.contains(onsetCandidate)
     }
-    
+
     private func isLongNucleus(_ nucleusIdx: Int) -> Bool {
         // Check if nucleus at given index is long (digraph vowel or followed by lengthening marker)
         guard nucleusIdx < tokens.count else { return false }
-        
+
         let vowelToken = tokens[nucleusIdx]
-        
+
         // Check if this vowel token itself is already a digraph (tokenized as one unit)
         if rule.digraphVowelsSet.contains(vowelToken.surface.lowercased()) {
             return true
         }
-        
+
         // Check if current vowel + next character forms a digraph vowel
         if nucleusIdx + 1 < tokens.count {
             let nextToken = tokens[nucleusIdx + 1]
@@ -120,7 +118,7 @@ class WordSyllabifier {
                 return true
             }
         }
-        
+
         // Single vowel is considered short
         return false
     }
@@ -163,11 +161,9 @@ class WordSyllabifier {
                 }
                 // Check if there are only separators between vowels
                 var allSeparators = true
-                for i in (nk + 1)..<nk1 {
-                    if tokens[i].tokenClass != .separator {
-                        allSeparators = false
-                        break
-                    }
+                for i in (nk + 1)..<nk1 where tokens[i].tokenClass != .separator {
+                    allSeparators = false
+                    break
                 }
                 if allSeparators {
                     // Only separators between vowels - place boundary before second vowel

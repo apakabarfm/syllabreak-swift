@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: swiftlint
+        name: SwiftLint
+        entry: make lint
+        language: system
+        pass_filenames: false
+        types: [swift]
