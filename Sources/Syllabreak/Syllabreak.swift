@@ -15,12 +15,18 @@ public final class Syllabreak: Sendable {
     }
 
     private static func loadRules() -> MetaRule {
-        guard let url = Bundle.module.url(forResource: "rules", withExtension: "json"),
-              let data = try? Data(contentsOf: url),
-              let rulesData = try? JSONDecoder().decode(RulesData.self, from: data) else {
-            // Return empty MetaRule if can't load
-            return MetaRule(rules: [])
+        guard let url = Bundle.module.url(forResource: "rules", withExtension: "json") else {
+            fatalError("Syllabreak: rules.json not found in bundle. This is a build/distribution error.")
         }
+        
+        guard let data = try? Data(contentsOf: url) else {
+            fatalError("Syllabreak: Failed to read rules.json from bundle.")
+        }
+        
+        guard let rulesData = try? JSONDecoder().decode(RulesData.self, from: data) else {
+            fatalError("Syllabreak: Failed to decode rules.json. The file format is invalid.")
+        }
+        
         return MetaRule(rules: rulesData.rules)
     }
 
