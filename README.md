@@ -4,6 +4,8 @@
 
 Multilingual library for accurate and deterministic hyphenation and syllable counting without relying on dictionaries.
 
+This is a Swift port of [syllabreak](https://github.com/apakabarfm/syllabreak-python) Python library.
+
 ## Supported Languages
 
 - 🇬🇧 English (`eng`)
