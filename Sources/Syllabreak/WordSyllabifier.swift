@@ -87,9 +87,42 @@ class WordSyllabifier {
         return extractConsonantCluster(left: left, right: right)
     }
 
-    private func isValidOnset(_ consonant1: String, _ consonant2: String) -> Bool {
+    private func isValidOnset(_ consonant1: String, _ consonant2: String, prevNucleusIdx: Int? = nil) -> Bool {
         let onsetCandidate = consonant1.lowercased() + consonant2.lowercased()
+        
+        // Check if this cluster requires a long vowel before it
+        if rule.clustersOnlyAfterLongSet.contains(onsetCandidate), let prevIdx = prevNucleusIdx {
+            // Check if previous nucleus is long (digraph or marked as long)
+            if !isLongNucleus(prevIdx) {
+                return false
+            }
+        }
+        
         return rule.clustersKeepNextSet.contains(onsetCandidate)
+    }
+    
+    private func isLongNucleus(_ nucleusIdx: Int) -> Bool {
+        // Check if nucleus at given index is long (digraph vowel or followed by lengthening marker)
+        guard nucleusIdx < tokens.count else { return false }
+        
+        let vowelToken = tokens[nucleusIdx]
+        
+        // Check if this vowel token itself is already a digraph (tokenized as one unit)
+        if rule.digraphVowelsSet.contains(vowelToken.surface.lowercased()) {
+            return true
+        }
+        
+        // Check if current vowel + next character forms a digraph vowel
+        if nucleusIdx + 1 < tokens.count {
+            let nextToken = tokens[nucleusIdx + 1]
+            let digraph = vowelToken.surface.lowercased() + nextToken.surface.lowercased()
+            if rule.digraphVowelsSet.contains(digraph) {
+                return true
+            }
+        }
+        
+        // Single vowel is considered short
+        return false
     }
 
     private func findBoundaryForSingleConsonant(_ clusterIndices: [Int]) -> Int {
@@ -97,20 +130,20 @@ class WordSyllabifier {
         return clusterIndices[0]
     }
 
-    private func findBoundaryForTwoConsonants(_ cluster: [Token], _ clusterIndices: [Int]) -> Int {
+    private func findBoundaryForTwoConsonants(_ cluster: [Token], _ clusterIndices: [Int], prevNucleusIdx: Int? = nil) -> Int {
         // Determine boundary for two-consonant cluster
-        if isValidOnset(cluster[0].surface, cluster[1].surface) {
+        if isValidOnset(cluster[0].surface, cluster[1].surface, prevNucleusIdx: prevNucleusIdx) {
             return clusterIndices[0]
         } else {
             return clusterIndices[1]
         }
     }
 
-    private func findBoundaryForLongCluster(_ cluster: [Token], _ clusterIndices: [Int]) -> Int {
+    private func findBoundaryForLongCluster(_ cluster: [Token], _ clusterIndices: [Int], prevNucleusIdx: Int? = nil) -> Int {
         // Determine boundary for cluster with 3+ consonants
         var boundaryIdx = clusterIndices[clusterIndices.count - 1]
 
-        if cluster.count >= 2 && isValidOnset(cluster[cluster.count - 2].surface, cluster[cluster.count - 1].surface) {
+        if cluster.count >= 2 && isValidOnset(cluster[cluster.count - 2].surface, cluster[cluster.count - 1].surface, prevNucleusIdx: prevNucleusIdx) {
             boundaryIdx = clusterIndices[clusterIndices.count - 2]
         }
 
@@ -145,9 +178,9 @@ class WordSyllabifier {
         } else if cluster.count == 1 {
             return findBoundaryForSingleConsonant(clusterIndices)
         } else if cluster.count == 2 {
-            return findBoundaryForTwoConsonants(cluster, clusterIndices)
+            return findBoundaryForTwoConsonants(cluster, clusterIndices, prevNucleusIdx: nk)
         } else {
-            return findBoundaryForLongCluster(cluster, clusterIndices)
+            return findBoundaryForLongCluster(cluster, clusterIndices, prevNucleusIdx: nk)
         }
     }
 

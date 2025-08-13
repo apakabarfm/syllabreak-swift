@@ -71,6 +71,16 @@
       ]
     },
     {
+      "lang": "deu",
+      "cases": [
+        "straße",
+        "fußball",
+        "mädchen",
+        "geschäft",
+        "größe"
+      ]
+    },
+    {
       "lang": null,
       "cases": [
         "123456",
