@@ -178,6 +178,43 @@
       "modifiers_attach_left": "",
       "modifiers_attach_right": "",
       "modifiers_separators": ""
+    },
+    {
+      "lang": "kat",
+      "vowels": "აეიოუ",
+      "consonants": "ბგდვზთკლმნპრსტფქღყშჩცძწჟხჯჰ",
+      "sonorants": "ლმნრ",
+      "clusters_keep_next": [
+        "ბრ",
+        "ბლ",
+        "გრ",
+        "გლ",
+        "დრ",
+        "პრ",
+        "პლ",
+        "ტრ",
+        "კრ",
+        "კლ",
+        "ფრ",
+        "ფლ",
+        "კვ",
+        "გვ",
+        "ტვ",
+        "თვ",
+        "შვ",
+        "ჭვ",
+        "ჩვ",
+        "ცვ",
+        "წვ",
+        "ხვ"
+      ],
+      "dont_split_digraphs": [],
+      "digraph_vowels": [],
+      "glides": "",
+      "syllabic_consonants": "",
+      "modifiers_attach_left": "",
+      "modifiers_attach_right": "",
+      "modifiers_separators": ""
     }
   ]
 }

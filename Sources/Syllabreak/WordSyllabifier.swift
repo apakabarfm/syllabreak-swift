@@ -117,9 +117,30 @@ class WordSyllabifier {
         return boundaryIdx
     }
 
-    private func findBoundaryInCluster(_ cluster: [Token], _ clusterIndices: [Int]) -> Int? {
-        // Determine where to place boundary in a consonant cluster
+    private func findBoundaryInCluster(_ cluster: [Token], _ clusterIndices: [Int], _ nk: Int, _ nk1: Int) -> Int? {
+        // Determine where to place boundary in a consonant cluster or between vowels
         if cluster.isEmpty {
+            // Check for vowel hiatus (adjacent vowels)
+            // If no glides defined and no digraph_vowels, split between vowels
+            if rule.glideSet.isEmpty && rule.digraphVowelsSet.isEmpty {
+                // Check if nuclei are adjacent (or only separated by modifiers/separators)
+                if nk1 - nk == 1 {
+                    // Adjacent vowels - place boundary between them
+                    return nk1
+                }
+                // Check if there are only separators between vowels
+                var allSeparators = true
+                for i in (nk + 1)..<nk1 {
+                    if tokens[i].tokenClass != .separator {
+                        allSeparators = false
+                        break
+                    }
+                }
+                if allSeparators {
+                    // Only separators between vowels - place boundary before second vowel
+                    return nk1
+                }
+            }
             return nil
         } else if cluster.count == 1 {
             return findBoundaryForSingleConsonant(clusterIndices)
@@ -136,7 +157,7 @@ class WordSyllabifier {
 
         for k in 0..<(nuclei.count - 1) {
             let (cluster, clusterIndices) = findClusterBetweenNuclei(nk: nuclei[k], nk1: nuclei[k + 1])
-            if let boundary = findBoundaryInCluster(cluster, clusterIndices) {
+            if let boundary = findBoundaryInCluster(cluster, clusterIndices, nuclei[k], nuclei[k + 1]) {
                 boundaries.append(boundary)
             }
         }
