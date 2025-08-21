@@ -40,8 +40,10 @@ final class DetectLanguageTests: XCTestCase {
             if !expected.isEmpty {
                 XCTAssertFalse(result.isEmpty, "Failed for '\(text)': got empty result, expected \(expected)")
                 if !result.isEmpty {
-                    XCTAssertEqual(result[0], expected[0],
-                                   "Failed for '\(text)': got \(result[0]) as first (from \(result)), expected \(expected[0])")
+                    XCTAssertEqual(
+                        result[0], expected[0],
+                        "Failed for '\(text)': got \(result[0]) as first (from \(result)), expected \(expected[0])"
+                    )
                 }
             } else {
                 XCTAssertEqual(result, [], "Failed for '\(text)': got \(result), expected empty list")

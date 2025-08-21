@@ -128,7 +128,11 @@ class WordSyllabifier {
         return clusterIndices[0]
     }
 
-    private func findBoundaryForTwoConsonants(_ cluster: [Token], _ clusterIndices: [Int], prevNucleusIdx: Int? = nil) -> Int {
+    private func findBoundaryForTwoConsonants(
+        _ cluster: [Token],
+        _ clusterIndices: [Int],
+        prevNucleusIdx: Int? = nil
+    ) -> Int {
         // Determine boundary for two-consonant cluster
         if isValidOnset(cluster[0].surface, cluster[1].surface, prevNucleusIdx: prevNucleusIdx) {
             return clusterIndices[0]
@@ -137,11 +141,19 @@ class WordSyllabifier {
         }
     }
 
-    private func findBoundaryForLongCluster(_ cluster: [Token], _ clusterIndices: [Int], prevNucleusIdx: Int? = nil) -> Int {
+    private func findBoundaryForLongCluster(
+        _ cluster: [Token],
+        _ clusterIndices: [Int],
+        prevNucleusIdx: Int? = nil
+    ) -> Int {
         // Determine boundary for cluster with 3+ consonants
         var boundaryIdx = clusterIndices[clusterIndices.count - 1]
 
-        if cluster.count >= 2 && isValidOnset(cluster[cluster.count - 2].surface, cluster[cluster.count - 1].surface, prevNucleusIdx: prevNucleusIdx) {
+        if cluster.count >= 2 && isValidOnset(
+            cluster[cluster.count - 2].surface,
+            cluster[cluster.count - 1].surface,
+            prevNucleusIdx: prevNucleusIdx
+        ) {
             boundaryIdx = clusterIndices[clusterIndices.count - 2]
         }
 

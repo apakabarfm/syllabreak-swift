@@ -18,7 +18,14 @@ final class SyllabifyTests: XCTestCase {
         let tests: [TestSection]
     }
 
-    func loadTestCases() -> [(section: String, lang: String?, text: String, want: String)] {
+    struct LoadedTestCase {
+        let section: String
+        let lang: String?
+        let text: String
+        let want: String
+    }
+
+    func loadTestCases() -> [LoadedTestCase] {
         guard let url = Bundle.module.url(forResource: "syllabify_tests", withExtension: "json"),
               let data = try? Data(contentsOf: url),
               let testData = try? JSONDecoder().decode(TestData.self, from: data) else {
@@ -26,10 +33,15 @@ final class SyllabifyTests: XCTestCase {
             return []
         }
 
-        var testCases: [(String, String?, String, String)] = []
+        var testCases: [LoadedTestCase] = []
         for section in testData.tests {
             for testCase in section.cases {
-                testCases.append((section.section, section.lang, testCase.text, testCase.want))
+                testCases.append(LoadedTestCase(
+                    section: section.section,
+                    lang: section.lang,
+                    text: testCase.text,
+                    want: testCase.want
+                ))
             }
         }
         return testCases
@@ -39,13 +51,16 @@ final class SyllabifyTests: XCTestCase {
         let syllabifier = Syllabreak(softHyphen: "-")
         let testCases = loadTestCases()
 
-        for (section, lang, text, want) in testCases {
+        for testCase in testCases {
             let result: String
-            if let lang = lang {
-                result = syllabifier.syllabify(text, lang: lang)
+            if let lang = testCase.lang {
+                result = syllabifier.syllabify(testCase.text, lang: lang)
             } else {
-                result = syllabifier.syllabify(text)
+                result = syllabifier.syllabify(testCase.text)
             }
+            let section = testCase.section
+            let text = testCase.text
+            let want = testCase.want
             XCTAssertEqual(result, want, "[\(section)] Failed for '\(text)': got '\(result)', want '\(want)'")
         }
     }
