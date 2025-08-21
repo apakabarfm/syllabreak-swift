@@ -31,7 +31,7 @@ struct SyllabifyTests {
         }
     }
 
-    @Embedded.json(Bundle.module, path: "syllabify_tests.json")
+    @Embedded.yaml(Bundle.module, path: "syllabify_tests.yaml")
     static var testData: TestData
 
     static var testCases: [LoadedTestCase] {

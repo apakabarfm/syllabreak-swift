@@ -23,7 +23,7 @@ struct DetectLanguageTests {
         }
     }
 
-    @Embedded.json(Bundle.module, path: "detect_language_tests.json")
+    @Embedded.yaml(Bundle.module, path: "detect_language_tests.yaml")
     static var testData: TestData
 
     static var testCases: [LanguageTestCase] {
