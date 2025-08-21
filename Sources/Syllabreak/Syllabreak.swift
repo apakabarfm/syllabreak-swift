@@ -1,4 +1,5 @@
 import Foundation
+import SwiftEmbed
 
 public final class Syllabreak: Sendable {
     public static let defaultSoftHyphen = "\u{00AD}"
@@ -9,25 +10,12 @@ public final class Syllabreak: Sendable {
         let rules: [LanguageRule]
     }
 
+    @Embedded.yaml(Bundle.module, path: "rules.yaml")
+    private static var rulesData: RulesData
+
     public init(softHyphen: String = defaultSoftHyphen) {
         self.softHyphen = softHyphen
-        self.metaRule = Syllabreak.loadRules()
-    }
-
-    private static func loadRules() -> MetaRule {
-        guard let url = Bundle.module.url(forResource: "rules", withExtension: "json") else {
-            fatalError("Syllabreak: rules.json not found in bundle. This is a build/distribution error.")
-        }
-
-        guard let data = try? Data(contentsOf: url) else {
-            fatalError("Syllabreak: Failed to read rules.json from bundle.")
-        }
-
-        guard let rulesData = try? JSONDecoder().decode(RulesData.self, from: data) else {
-            fatalError("Syllabreak: Failed to decode rules.json. The file format is invalid.")
-        }
-
-        return MetaRule(rules: rulesData.rules)
+        self.metaRule = MetaRule(rules: Self.rulesData.rules)
     }
 
     public func detectLanguage(_ text: String) -> [String] {

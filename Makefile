@@ -20,7 +20,7 @@ clean:
 install:
 	brew install swiftlint
 
-convert-yaml:
-	python3 -c "import yaml, json; json.dump(yaml.safe_load(open('$(PYTHON_DATA_DIR)/rules.yaml')), open('$(SWIFT_RESOURCES_DIR)/rules.json', 'w'), indent=2, ensure_ascii=False)"
-	python3 -c "import yaml, json; json.dump(yaml.safe_load(open('$(PYTHON_DATA_DIR)/syllabify_tests.yaml')), open('$(SWIFT_TEST_RESOURCES_DIR)/syllabify_tests.json', 'w'), indent=2, ensure_ascii=False)"
-	python3 -c "import yaml, json; json.dump(yaml.safe_load(open('$(PYTHON_DATA_DIR)/detect_language_tests.yaml')), open('$(SWIFT_TEST_RESOURCES_DIR)/detect_language_tests.json', 'w'), indent=2, ensure_ascii=False)"
+sync-yaml:
+	cp $(PYTHON_DATA_DIR)/rules.yaml $(SWIFT_RESOURCES_DIR)/
+	cp $(PYTHON_DATA_DIR)/syllabify_tests.yaml $(SWIFT_TEST_RESOURCES_DIR)/
+	cp $(PYTHON_DATA_DIR)/detect_language_tests.yaml $(SWIFT_TEST_RESOURCES_DIR)/

@@ -1,0 +1,98 @@
+rules:
+  - lang: "eng"
+    vowels: "aeiouy"
+    consonants: "bcdfghjklmnpqrstvwxyz"
+    sonorants: "lmnr"
+    clusters_keep_next: ["bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "sl", "sm", "sn", "sp", "st", "sw", "tr", "tw"]
+    dont_split_digraphs: ["ch", "sh", "th", "ph", "wh", "ck", "gh", "qu"]
+    digraph_vowels: ["ea", "ee", "oo", "ou", "ie", "ei", "ai", "ay", "oy", "oi", "ue"]
+    glides: "wy"
+    syllabic_consonants: "lmnr"
+    modifiers_attach_left: ""
+    modifiers_attach_right: ""
+    modifiers_separators: ""
+
+  - lang: "rus"
+    vowels: "аеёиоуыэюя"
+    consonants: "бвгджзйклмнпрстфхцчшщ"
+    sonorants: "лмнрй"
+    clusters_keep_next: ["бл", "бр", "кл", "кр", "др", "тр", "пл", "пр", "сл", "см", "сн", "сп", "ст", "ск", "фл", "фр", "гр", "гл"]
+    dont_split_digraphs: []
+    digraph_vowels: ["ье", "ья", "ьё", "ьи"]
+    glides: "й"
+    syllabic_consonants: ""
+    modifiers_attach_left: "ь"
+    modifiers_attach_right: ""
+    modifiers_separators: "ъ"
+
+  - lang: "srp-cyrl"
+    vowels: "аиуео"
+    consonants: "бвгдђжзјклљмнњпрстћфхцчџш"
+    sonorants: "лљмнњрј"
+    clusters_keep_next: ["бр", "кр", "др", "тр", "пр", "гр", "гл", "пл", "кл", "сп", "ст", "ск"]
+    dont_split_digraphs: []
+    digraph_vowels: []
+    glides: "ј"
+    syllabic_consonants: "р"
+    modifiers_attach_left: ""
+    modifiers_attach_right: ""
+    modifiers_separators: ""
+
+  - lang: "srp-latn"
+    vowels: "aeiou"
+    consonants: "bcčćdžđfghjklmnprsštvzž"
+    sonorants: "lmnrj"
+    clusters_keep_next: ["br", "kr", "dr", "tr", "pr", "gr", "gl", "pl", "kl", "sp", "st", "sk"]
+    dont_split_digraphs: ["nj", "lj", "dž", "dj"]
+    digraph_vowels: []
+    glides: "j"
+    syllabic_consonants: "r"
+    modifiers_attach_left: ""
+    modifiers_attach_right: ""
+    modifiers_separators: ""
+
+  - lang: "tur"
+    vowels: "aeıioöuü"
+    consonants: "bcçdfgğhjklmnprsştvyz"
+    sonorants: "lmnr"
+    clusters_keep_next: ["br", "bl", "kr", "kl", "pr", "pl", "tr", "dr", "fr", "fl", "gr", "gl"]  # rare in native words, mostly in loanwords
+    dont_split_digraphs: []  # Turkish orthography doesn't use digraphs
+    digraph_vowels: []       # No vowel digraphs in Turkish
+    glides: "y"
+    syllabic_consonants: ""  # Turkish doesn't have syllabic consonants
+    modifiers_attach_left: ""  # No diacritic markers as separate letters
+    modifiers_attach_right: ""
+    modifiers_separators: ""
+
+  - lang: "deu"
+    vowels: "aeiouyäöü"
+    consonants: "bcdfghjklmnpqrstvwxzß"
+    sonorants: "lmnr"
+    # Allowable onset clusters; st stays here, gating is done by 'short nucleus' rule
+    clusters_keep_next: ["sp","st","sch","tr","dr","kr","gr","pr","br","fr","fl","kl","gl","pl","bl","sn","sm","sw","sk","spr","str","skr"]
+    dont_split_digraphs: ["sch","ch","qu","ph","th"]
+    # Treat these as single (long) nuclei: diphthongs + double vowels + vowel+h lengthening
+    digraph_vowels: ["ie","ei","ai","au","eu","äu","aa","ee","oo","ah","eh","ih","oh","uh","äh","öh","üh"]
+    glides: "wj"         # 'y' is a vowel in German loanwords
+    syllabic_consonants: ""
+    modifiers_attach_left: ""
+    modifiers_attach_right: ""
+    modifiers_separators: ""
+    # Clusters that should only be kept after long vowels (split after short vowels)
+    clusters_only_after_long: ["st"]
+
+  - lang: "kat"
+    vowels: "აეიოუ"
+    consonants: "ბგდვზთკლმნპრსტფქღყშჩცძწჟხჯჰ"
+    sonorants: "ლმნრ"
+    # Allow only these onset clusters (whitelist). Anything else -> split V.CV
+    clusters_keep_next:
+      ["ბრ","ბლ","გრ","გლ","დრ","პრ","პლ","ტრ","კრ","კლ","ფრ","ფლ",
+       "კვ","გვ","ტვ","თვ","შვ","ჭვ","ჩვ","ცვ","წვ","ხვ"]
+    dont_split_digraphs: []   # No digraphs in modern Georgian
+    digraph_vowels: []        # No vowel digraphs: split any V+V (hiatus)
+    glides: ""                # No glides: force split for sequences like იე -> ი-ე
+    syllabic_consonants: ""   # No syllabic consonants
+    modifiers_attach_left: ""
+    modifiers_attach_right: ""
+    modifiers_separators: ""

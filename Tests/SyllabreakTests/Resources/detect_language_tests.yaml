@@ -1,0 +1,74 @@
+tests:
+  - lang: "eng"
+    cases:
+      - "hello"
+      - "world"
+      - "computer"
+      - "beautiful"
+      - "HELLO"
+      - "COMPUTER"
+      - "self-service"
+      - "twenty-one"
+      - "Alice (name)"
+      - "(parentheses)"
+      - "it's"
+      - "don't"
+      - "lepo"
+  
+  - lang: "rus"
+    cases:
+      - "привет"
+      - "мир"
+      - "компьютер"
+      - "красивый"
+      - "школа"
+      - "ПРИВЕТ"
+      - "КОМПЬЮТЕР"
+      - "Музей-усадьба"
+      - "Музей-усадьба Коломенское"
+      - "кое-что"
+      - "из-за"
+      - "Алиса (имя)"
+      - "(скобки)"
+      - "рачунар"
+      - "свет"
+  
+  - lang: "srp-cyrl"
+    cases:
+      - "ђак"
+      - "њега"
+      - "ЂАК"
+      - "ЊЕГА"
+  
+  - lang: "srp-latn"
+    cases:
+      - "čovek"
+      - "šuma"
+      - "računar"
+      - "učitelj"
+      - "čaša"
+      - "ČOVEK"
+      - "ŠUMA"
+  
+  - lang: "kat"
+    cases:
+      - "გამარჯობა"
+      - "ქალაქი"
+      - "საქართველო"
+      - "მშვენიერი"
+      - "გამარჯობა!"
+      - "თბილისი"
+  
+  - lang: "deu"
+    cases:
+      - "straße"
+      - "fußball"
+      - "mädchen"
+      - "geschäft"
+      - "größe"
+  
+  - lang: null
+    cases:
+      - "123456"
+      - "!@#$%"
+      - ""

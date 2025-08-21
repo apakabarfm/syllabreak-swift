@@ -4,28 +4,28 @@ import SwiftEmbed
 @testable import Syllabreak
 
 struct DetectLanguageTests {
-    
+
     struct TestGroup: Codable {
         let lang: String?
         let cases: [String]
     }
-    
+
     struct TestData: Codable {
         let tests: [TestGroup]
     }
-    
+
     struct LanguageTestCase: CustomTestStringConvertible {
         let text: String
         let expected: [String]
-        
+
         var testDescription: String {
             text
         }
     }
-    
+
     @Embedded.json(Bundle.module, path: "detect_language_tests.json")
     static var testData: TestData
-    
+
     static var testCases: [LanguageTestCase] {
         var cases: [LanguageTestCase] = []
         for group in testData.tests {
@@ -36,21 +36,23 @@ struct DetectLanguageTests {
         }
         return cases
     }
-    
+
     @Test(arguments: testCases)
     func detectLanguage(testCase: LanguageTestCase) {
         let s = Syllabreak()
         let result = s.detectLanguage(testCase.text)
-        
+
         if !testCase.expected.isEmpty {
-            #expect(!result.isEmpty, 
+            #expect(!result.isEmpty,
                     "Failed for '\(testCase.text)': got empty result, expected \(testCase.expected)")
             if !result.isEmpty {
-                #expect(result[0] == testCase.expected[0],
-                       "Failed for '\(testCase.text)': got \(result[0]) as first (from \(result)), expected \(testCase.expected[0])")
+                let first = result[0]
+                let expected = testCase.expected[0]
+                #expect(first == expected,
+                       "Failed for '\(testCase.text)': got \(first) as first (from \(result)), expected \(expected)")
             }
         } else {
-            #expect(result == [], 
+            #expect(result == [],
                    "Failed for '\(testCase.text)': got \(result), expected empty list")
         }
     }

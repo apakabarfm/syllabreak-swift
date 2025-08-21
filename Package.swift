@@ -18,6 +18,9 @@ let package = Package(
     targets: [
         .target(
             name: "Syllabreak",
+            dependencies: [
+                .product(name: "SwiftEmbed", package: "swift-embed")
+            ],
             resources: [.process("Resources")]),
         .testTarget(
             name: "SyllabreakTests",
