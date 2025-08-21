@@ -13,8 +13,7 @@ let package = Package(
             targets: ["Syllabreak"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/botforge-pro/swift-embed", from: "1.2.0"),
-        .package(url: "https://github.com/swiftlang/swift-testing", from: "0.12.0")
+        .package(url: "https://github.com/botforge-pro/swift-embed", from: "1.2.0")
     ],
     targets: [
         .target(
@@ -24,8 +23,7 @@ let package = Package(
             name: "SyllabreakTests",
             dependencies: [
                 "Syllabreak",
-                .product(name: "SwiftEmbed", package: "swift-embed"),
-                .product(name: "Testing", package: "swift-testing")
+                .product(name: "SwiftEmbed", package: "swift-embed")
             ],
             resources: [.process("Resources")]),
     ]

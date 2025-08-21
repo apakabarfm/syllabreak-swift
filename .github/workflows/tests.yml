@@ -8,13 +8,19 @@ on:
 
 jobs:
   test:
-    runs-on: macos-14
+    runs-on: macos-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+    
+    - name: Select Xcode
+      run: sudo xcode-select -s /Applications/Xcode_16.app
+    
+    - name: Swift version
+      run: swift --version
     
     - name: Build
-      run: make build
-      
+      run: swift build
+    
     - name: Run tests
-      run: make test
+      run: swift test
