@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import SwiftEmbed
 @testable import Syllabreak
 
 struct SyllabifyTests {
@@ -30,18 +31,14 @@ struct SyllabifyTests {
         }
     }
     
-    static func loadTestCases() -> [LoadedTestCase] {
-        guard let url = Bundle.module.url(forResource: "syllabify_tests", withExtension: "json"),
-              let data = try? Data(contentsOf: url),
-              let testData = try? JSONDecoder().decode(TestData.self, from: data) else {
-            Issue.record("Failed to load test cases")
-            return []
-        }
-        
-        var testCases: [LoadedTestCase] = []
+    @Embedded.json(Bundle.module, path: "syllabify_tests.json")
+    static var testData: TestData
+    
+    static var testCases: [LoadedTestCase] {
+        var cases: [LoadedTestCase] = []
         for section in testData.tests {
             for testCase in section.cases {
-                testCases.append(LoadedTestCase(
+                cases.append(LoadedTestCase(
                     section: section.section,
                     lang: section.lang,
                     text: testCase.text,
@@ -49,10 +46,10 @@ struct SyllabifyTests {
                 ))
             }
         }
-        return testCases
+        return cases
     }
     
-    @Test(arguments: loadTestCases())
+    @Test(arguments: testCases)
     func syllabify(testCase: LoadedTestCase) {
         let syllabifier = Syllabreak(softHyphen: "-")
         

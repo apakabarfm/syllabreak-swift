@@ -4,13 +4,16 @@ import PackageDescription
 let package = Package(
     name: "Syllabreak",
     platforms: [
-        .iOS(.v13),
-        .macOS(.v10_15)
+        .iOS(.v15),
+        .macOS(.v12)
     ],
     products: [
         .library(
             name: "Syllabreak",
             targets: ["Syllabreak"]),
+    ],
+    dependencies: [
+        .package(url: "https://github.com/botforge-pro/swift-embed", from: "1.2.0")
     ],
     targets: [
         .target(
@@ -18,7 +21,10 @@ let package = Package(
             resources: [.process("Resources")]),
         .testTarget(
             name: "SyllabreakTests",
-            dependencies: ["Syllabreak"],
+            dependencies: [
+                "Syllabreak",
+                .product(name: "SwiftEmbed", package: "swift-embed")
+            ],
             resources: [.process("Resources")]),
     ]
 )

@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import SwiftEmbed
 @testable import Syllabreak
 
 struct DetectLanguageTests {
@@ -22,25 +23,21 @@ struct DetectLanguageTests {
         }
     }
     
-    static func loadTestCases() -> [LanguageTestCase] {
-        guard let url = Bundle.module.url(forResource: "detect_language_tests", withExtension: "json"),
-              let data = try? Data(contentsOf: url),
-              let testData = try? JSONDecoder().decode(TestData.self, from: data) else {
-            Issue.record("Failed to load test cases")
-            return []
-        }
-        
-        var testCases: [LanguageTestCase] = []
+    @Embedded.json(Bundle.module, path: "detect_language_tests.json")
+    static var testData: TestData
+    
+    static var testCases: [LanguageTestCase] {
+        var cases: [LanguageTestCase] = []
         for group in testData.tests {
             let expected = group.lang.map { [$0] } ?? []
             for text in group.cases {
-                testCases.append(LanguageTestCase(text: text, expected: expected))
+                cases.append(LanguageTestCase(text: text, expected: expected))
             }
         }
-        return testCases
+        return cases
     }
     
-    @Test(arguments: loadTestCases())
+    @Test(arguments: testCases)
     func detectLanguage(testCase: LanguageTestCase) {
         let s = Syllabreak()
         let result = s.detectLanguage(testCase.text)
