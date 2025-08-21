@@ -1,0 +1,45 @@
+{
+  "" : {
+    "const-values" : "/Users/smee/Developer/apakabar-core/syllabreak-swift/build/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/Syllabreak-master.swiftconstvalues",
+    "dependencies" : "/Users/smee/Developer/apakabar-core/syllabreak-swift/build/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/Syllabreak-master.d",
+    "diagnostics" : "/Users/smee/Developer/apakabar-core/syllabreak-swift/build/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/Syllabreak-master.dia",
+    "emit-module-dependencies" : "/Users/smee/Developer/apakabar-core/syllabreak-swift/build/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/Syllabreak-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/smee/Developer/apakabar-core/syllabreak-swift/build/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/Syllabreak-master-emit-module.dia",
+    "swift-dependencies" : "/Users/smee/Developer/apakabar-core/syllabreak-swift/build/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/Syllabreak-master.swiftdeps"
+  },
+  "/Users/smee/Developer/apakabar-core/syllabreak-swift/Sources/Syllabreak/LanguageRule.swift" : {
+    "index-unit-output-path" : "/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/LanguageRule.o",
+    "llvm-bc" : "/Users/smee/Developer/apakabar-core/syllabreak-swift/build/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/LanguageRule.bc",
+    "object" : "/Users/smee/Developer/apakabar-core/syllabreak-swift/build/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/LanguageRule.o"
+  },
+  "/Users/smee/Developer/apakabar-core/syllabreak-swift/Sources/Syllabreak/MetaRule.swift" : {
+    "index-unit-output-path" : "/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/MetaRule.o",
+    "llvm-bc" : "/Users/smee/Developer/apakabar-core/syllabreak-swift/build/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/MetaRule.bc",
+    "object" : "/Users/smee/Developer/apakabar-core/syllabreak-swift/build/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/MetaRule.o"
+  },
+  "/Users/smee/Developer/apakabar-core/syllabreak-swift/Sources/Syllabreak/Syllabreak.swift" : {
+    "index-unit-output-path" : "/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/Syllabreak.o",
+    "llvm-bc" : "/Users/smee/Developer/apakabar-core/syllabreak-swift/build/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/Syllabreak.bc",
+    "object" : "/Users/smee/Developer/apakabar-core/syllabreak-swift/build/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/Syllabreak.o"
+  },
+  "/Users/smee/Developer/apakabar-core/syllabreak-swift/Sources/Syllabreak/Token.swift" : {
+    "index-unit-output-path" : "/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/Token.o",
+    "llvm-bc" : "/Users/smee/Developer/apakabar-core/syllabreak-swift/build/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/Token.bc",
+    "object" : "/Users/smee/Developer/apakabar-core/syllabreak-swift/build/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/Token.o"
+  },
+  "/Users/smee/Developer/apakabar-core/syllabreak-swift/Sources/Syllabreak/Tokenizer.swift" : {
+    "index-unit-output-path" : "/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/Tokenizer.o",
+    "llvm-bc" : "/Users/smee/Developer/apakabar-core/syllabreak-swift/build/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/Tokenizer.bc",
+    "object" : "/Users/smee/Developer/apakabar-core/syllabreak-swift/build/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/Tokenizer.o"
+  },
+  "/Users/smee/Developer/apakabar-core/syllabreak-swift/Sources/Syllabreak/WordSyllabifier.swift" : {
+    "index-unit-output-path" : "/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/WordSyllabifier.o",
+    "llvm-bc" : "/Users/smee/Developer/apakabar-core/syllabreak-swift/build/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/WordSyllabifier.bc",
+    "object" : "/Users/smee/Developer/apakabar-core/syllabreak-swift/build/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/WordSyllabifier.o"
+  },
+  "/Users/smee/Developer/apakabar-core/syllabreak-swift/build/Syllabreak.build/Release-iphoneos/Syllabreak.build/DerivedSources/resource_bundle_accessor.swift" : {
+    "index-unit-output-path" : "/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/resource_bundle_accessor.o",
+    "llvm-bc" : "/Users/smee/Developer/apakabar-core/syllabreak-swift/build/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/resource_bundle_accessor.bc",
+    "object" : "/Users/smee/Developer/apakabar-core/syllabreak-swift/build/Syllabreak.build/Release-iphoneos/Syllabreak.build/Objects-normal/arm64/resource_bundle_accessor.o"
+  }
+}

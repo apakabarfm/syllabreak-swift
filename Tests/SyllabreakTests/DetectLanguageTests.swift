@@ -1,53 +1,60 @@
-import XCTest
+import Testing
+import Foundation
 @testable import Syllabreak
 
-final class DetectLanguageTests: XCTestCase {
-
+struct DetectLanguageTests {
+    
     struct TestGroup: Codable {
         let lang: String?
         let cases: [String]
     }
-
+    
     struct TestData: Codable {
         let tests: [TestGroup]
     }
-
-    func loadTestCases() -> [(text: String, expected: [String])] {
+    
+    struct LanguageTestCase: CustomTestStringConvertible {
+        let text: String
+        let expected: [String]
+        
+        var testDescription: String {
+            text
+        }
+    }
+    
+    static func loadTestCases() -> [LanguageTestCase] {
         guard let url = Bundle.module.url(forResource: "detect_language_tests", withExtension: "json"),
               let data = try? Data(contentsOf: url),
               let testData = try? JSONDecoder().decode(TestData.self, from: data) else {
-            XCTFail("Failed to load test cases")
+            Issue.record("Failed to load test cases")
             return []
         }
-
-        var testCases: [(String, [String])] = []
+        
+        var testCases: [LanguageTestCase] = []
         for group in testData.tests {
             let expected = group.lang.map { [$0] } ?? []
             for text in group.cases {
-                testCases.append((text, expected))
+                testCases.append(LanguageTestCase(text: text, expected: expected))
             }
         }
         return testCases
     }
-
-    func testDetectLanguage() {
+    
+    @Test(arguments: loadTestCases())
+    func detectLanguage(testCase: LanguageTestCase) {
         let s = Syllabreak()
-        let testCases = loadTestCases()
-
-        for (text, expected) in testCases {
-            let result = s.detectLanguage(text)
-
-            if !expected.isEmpty {
-                XCTAssertFalse(result.isEmpty, "Failed for '\(text)': got empty result, expected \(expected)")
-                if !result.isEmpty {
-                    XCTAssertEqual(
-                        result[0], expected[0],
-                        "Failed for '\(text)': got \(result[0]) as first (from \(result)), expected \(expected[0])"
-                    )
-                }
-            } else {
-                XCTAssertEqual(result, [], "Failed for '\(text)': got \(result), expected empty list")
+        let result = s.detectLanguage(testCase.text)
+        
+        if !testCase.expected.isEmpty {
+            #expect(!result.isEmpty, 
+                    "Failed for '\(testCase.text)': got empty result, expected \(testCase.expected)")
+            if !result.isEmpty {
+                #expect(result[0] == testCase.expected[0],
+                       "Failed for '\(testCase.text)': got \(result[0]) as first (from \(result)), expected \(testCase.expected[0])")
             }
+        } else {
+            #expect(result == [], 
+                   "Failed for '\(testCase.text)': got \(result), expected empty list")
         }
     }
 }
