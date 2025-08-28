@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/botforge-pro/swift-embed",
       "state" : {
-        "revision" : "a577380d507bac674805afcfd28633bb0510af7f",
-        "version" : "1.2.0"
+        "revision" : "794bfe98d5a14011b401b82a50c63aa984ca315c",
+        "version" : "1.3.1"
       }
     },
     {
