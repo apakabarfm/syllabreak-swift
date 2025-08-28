@@ -11,8 +11,10 @@ test:
 	swift test
 
 lint:
-	swiftlint --fix
 	swiftlint
+
+lint-fix:
+	swiftlint --fix
 
 clean:
 	swift package clean
