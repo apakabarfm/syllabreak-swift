@@ -1,6 +1,5 @@
-# syllabreak-swift
-
 [![Tests](https://github.com/apakabarfm/syllabreak-swift/actions/workflows/tests.yml/badge.svg)](https://github.com/apakabarfm/syllabreak-swift/actions/workflows/tests.yml)
+# syllabreak-swift
 
 Multilingual library for accurate and deterministic hyphenation and syllable counting without relying on dictionaries.
 
