@@ -13,7 +13,7 @@ let package = Package(
             targets: ["Syllabreak"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/botforge-pro/swift-embed", from: "1.4.0")
+        .package(url: "https://github.com/botforge-pro/swift-embed", from: "1.5.0")
     ],
     targets: [
         .target(

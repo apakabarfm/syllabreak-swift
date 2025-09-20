@@ -1,13 +1,13 @@
 {
-  "originHash" : "6c6ee778c7444a10a1a906d8639df03797f06aa404dea27b7865007655d8747d",
+  "originHash" : "8583d1347603d5008f7f9b426e7d8688669fc56fc92e1116be309f03fa808c55",
   "pins" : [
     {
       "identity" : "swift-embed",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/botforge-pro/swift-embed",
       "state" : {
-        "revision" : "064a220ee21e5e13084770a724293444552623a0",
-        "version" : "1.4.0"
+        "revision" : "303c3b8ff91fbf1f679f351774d4a7dc5ab11528",
+        "version" : "1.5.0"
       }
     },
     {
