@@ -1,4 +1,0 @@
-module Syllabreak {
-header "Syllabreak-Swift.h"
-export *
-}

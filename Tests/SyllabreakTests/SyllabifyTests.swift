@@ -31,8 +31,9 @@ struct SyllabifyTests {
         }
     }
 
-    @Embedded.yaml(Bundle.module, path: "syllabify_tests.yaml")
-    static var testData: TestData
+    static var testData: TestData {
+        Embedded.getYAML(Bundle.module, path: "syllabify_tests.yaml")
+    }
 
     static var testCases: [LoadedTestCase] {
         var cases: [LoadedTestCase] = []

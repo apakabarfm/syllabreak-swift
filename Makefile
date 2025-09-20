@@ -18,6 +18,7 @@ lint-fix:
 
 clean:
 	swift package clean
+	rm -rf .build Package.resolved
 
 install:
 	brew install swiftlint

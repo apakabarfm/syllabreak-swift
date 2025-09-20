@@ -10,8 +10,9 @@ public final class Syllabreak: Sendable {
         let rules: [LanguageRule]
     }
 
-    @Embedded.yaml(Bundle.module, path: "rules.yaml")
-    private static var rulesData: RulesData
+    private static var rulesData: RulesData {
+        Embedded.getYAML(Bundle.module, path: "rules.yaml")
+    }
 
     public init(softHyphen: String = defaultSoftHyphen) {
         self.softHyphen = softHyphen

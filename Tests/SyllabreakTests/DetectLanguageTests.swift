@@ -23,8 +23,9 @@ struct DetectLanguageTests {
         }
     }
 
-    @Embedded.yaml(Bundle.module, path: "detect_language_tests.yaml")
-    static var testData: TestData
+    static var testData: TestData {
+        Embedded.getYAML(Bundle.module, path: "detect_language_tests.yaml")
+    }
 
     static var testCases: [LanguageTestCase] {
         var cases: [LanguageTestCase] = []
