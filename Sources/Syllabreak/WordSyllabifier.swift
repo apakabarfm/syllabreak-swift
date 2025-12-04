@@ -163,24 +163,31 @@ class WordSyllabifier {
     private func findBoundaryInCluster(_ cluster: [Token], _ clusterIndices: [Int], _ nk: Int, _ nk1: Int) -> Int? {
         // Determine where to place boundary in a consonant cluster or between vowels
         if cluster.isEmpty {
-            // Check for vowel hiatus (adjacent vowels)
-            // If no glides defined and no digraph_vowels, split between vowels
-            if rule.glideSet.isEmpty && rule.digraphVowelsSet.isEmpty {
-                // Check if nuclei are adjacent (or only separated by modifiers/separators)
-                if nk1 - nk == 1 {
-                    // Adjacent vowels - place boundary between them
-                    return nk1
-                }
+            // Check for vowel hiatus (adjacent vowels that form separate syllables)
+            guard rule.splitHiatus == true else {
+                return nil
+            }
+
+            // Check if nuclei are adjacent (or only separated by modifiers/separators)
+            var areAdjacent = nk1 - nk == 1
+            if !areAdjacent {
                 // Check if there are only separators between vowels
                 var allSeparators = true
                 for i in (nk + 1)..<nk1 where tokens[i].tokenClass != .separator {
                     allSeparators = false
                     break
                 }
-                if allSeparators {
-                    // Only separators between vowels - place boundary before second vowel
-                    return nk1
+                areAdjacent = allSeparators
+            }
+
+            if areAdjacent {
+                // Check if these two vowels form a digraph (don't split)
+                let vowelPair = tokens[nk].surface.lowercased() + tokens[nk1].surface.lowercased()
+                if rule.digraphVowelsSet.contains(vowelPair) {
+                    return nil
                 }
+                // Hiatus: split between vowels
+                return nk1
             }
             return nil
         } else if cluster.count == 1 {

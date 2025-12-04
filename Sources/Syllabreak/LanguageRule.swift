@@ -14,6 +14,7 @@ struct LanguageRule: Codable, Sendable {
     let modifiersAttachRight: String?
     let modifiersSeparators: String?
     let clustersOnlyAfterLong: [String]?
+    let splitHiatus: Bool?
 
     // Computed properties for sets
     var vowelSet: Set<Character> {
@@ -85,6 +86,7 @@ struct LanguageRule: Codable, Sendable {
         case modifiersAttachRight = "modifiers_attach_right"
         case modifiersSeparators = "modifiers_separators"
         case clustersOnlyAfterLong = "clusters_only_after_long"
+        case splitHiatus = "split_hiatus"
     }
 
     func isVowel(_ char: Character) -> Bool {
