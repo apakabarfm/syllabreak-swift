@@ -28,6 +28,38 @@ class WordSyllabifier {
             nuclei.append(i)
         }
 
+        // Check for final semivowels (e.g., Romanian final -i after consonant)
+        // These don't form a separate syllable nucleus
+        if !nuclei.isEmpty && !rule.finalSemivowelsSet.isEmpty {
+            let lastNucleusIdx = nuclei[nuclei.count - 1]
+            let lastToken = tokens[lastNucleusIdx]
+
+            // Check if it's the last token (or only followed by non-letters)
+            var isFinal = true
+            for j in (lastNucleusIdx + 1)..<tokens.count {
+                let tokenClass = tokens[j].tokenClass
+                if tokenClass != .separator && tokenClass != .other {
+                    isFinal = false
+                    break
+                }
+            }
+
+            if isFinal {
+                // Check if final vowel is in semivowels set
+                if let firstChar = lastToken.surface.lowercased().first,
+                   rule.finalSemivowelsSet.contains(firstChar) {
+                    // Check if preceded by consonant
+                    if lastNucleusIdx > 0 {
+                        let prevIdx = lastNucleusIdx - 1
+                        if tokens[prevIdx].tokenClass == .consonant {
+                            // Remove this nucleus - it's a semivowel, not a syllable
+                            nuclei.removeLast()
+                        }
+                    }
+                }
+            }
+        }
+
         if !nuclei.isEmpty {
             return nuclei
         }
