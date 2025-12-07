@@ -16,6 +16,9 @@ struct LanguageRule: Codable, Sendable {
     let clustersOnlyAfterLong: [String]?
     let splitHiatus: Bool?
     let finalSemivowels: String?
+    let finalSequencesKeep: [String]?
+    let suffixesBreakVre: [String]?
+    let suffixesKeepVre: [String]?
 
     // Computed properties for sets
     var vowelSet: Set<Character> {
@@ -70,6 +73,18 @@ struct LanguageRule: Codable, Sendable {
         Set(finalSemivowels ?? "")
     }
 
+    var finalSequencesKeepSet: Set<String> {
+        Set(finalSequencesKeep ?? [])
+    }
+
+    var suffixesBreakVreSet: Set<String> {
+        Set(suffixesBreakVre ?? [])
+    }
+
+    var suffixesKeepVreSet: Set<String> {
+        Set(suffixesKeepVre ?? [])
+    }
+
     var allChars: Set<Character> {
         vowelSet.union(consonantSet)
     }
@@ -93,6 +108,9 @@ struct LanguageRule: Codable, Sendable {
         case clustersOnlyAfterLong = "clusters_only_after_long"
         case splitHiatus = "split_hiatus"
         case finalSemivowels = "final_semivowels"
+        case finalSequencesKeep = "final_sequences_keep"
+        case suffixesBreakVre = "suffixes_break_vre"
+        case suffixesKeepVre = "suffixes_keep_vre"
     }
 
     func isVowel(_ char: Character) -> Bool {

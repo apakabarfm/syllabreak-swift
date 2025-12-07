@@ -21,58 +21,99 @@ class WordSyllabifier {
     }
 
     private static func findNuclei(tokens: [Token], rule: LanguageRule) -> [Int] {
-        var nuclei: [Int] = []
-
-        // First look for vowels
-        for (i, token) in tokens.enumerated() where token.tokenClass == .vowel {
-            nuclei.append(i)
-        }
-
-        // Check for final semivowels (e.g., Romanian final -i after consonant)
-        // These don't form a separate syllable nucleus
-        if !nuclei.isEmpty && !rule.finalSemivowelsSet.isEmpty {
-            let lastNucleusIdx = nuclei[nuclei.count - 1]
-            let lastToken = tokens[lastNucleusIdx]
-
-            // Check if it's the last token (or only followed by non-letters)
-            var isFinal = true
-            for j in (lastNucleusIdx + 1)..<tokens.count {
-                let tokenClass = tokens[j].tokenClass
-                if tokenClass != .separator && tokenClass != .other {
-                    isFinal = false
-                    break
-                }
-            }
-
-            if isFinal {
-                // Check if final vowel is in semivowels set
-                if let firstChar = lastToken.surface.lowercased().first,
-                   rule.finalSemivowelsSet.contains(firstChar) {
-                    // Check if preceded by consonant
-                    if lastNucleusIdx > 0 {
-                        let prevIdx = lastNucleusIdx - 1
-                        if tokens[prevIdx].tokenClass == .consonant {
-                            // Remove this nucleus - it's a semivowel, not a syllable
-                            nuclei.removeLast()
-                        }
-                    }
-                }
-            }
-        }
+        var nuclei = findVowelNuclei(tokens: tokens)
+        nuclei = removeFinalSemivowels(tokens: tokens, nuclei: nuclei, rule: rule)
+        nuclei = addSyllabicConsonants(tokens: tokens, nuclei: nuclei, rule: rule)
 
         if !nuclei.isEmpty {
             return nuclei
         }
 
-        // If no vowels, look for syllabic consonants
-        for (i, token) in tokens.enumerated() {
-            if token.tokenClass == .consonant &&
-               token.surface.count == 1 &&
-               rule.syllabicConsonantSet.contains(Character(token.surface.lowercased())) {
-                nuclei.append(i)
-            }
+        // Fallback: if no vowels at all, try syllabic consonants anywhere
+        return findFallbackSyllabicConsonants(tokens: tokens, rule: rule)
+    }
+
+    private static func findVowelNuclei(tokens: [Token]) -> [Int] {
+        var nuclei: [Int] = []
+        for (i, token) in tokens.enumerated() where token.tokenClass == .vowel {
+            nuclei.append(i)
+        }
+        return nuclei
+    }
+
+    private static func removeFinalSemivowels(tokens: [Token], nuclei: [Int], rule: LanguageRule) -> [Int] {
+        var nuclei = nuclei
+        guard !nuclei.isEmpty && !rule.finalSemivowelsSet.isEmpty else { return nuclei }
+
+        let lastNucleusIdx = nuclei[nuclei.count - 1]
+        let lastToken = tokens[lastNucleusIdx]
+
+        let isFinal = (lastNucleusIdx + 1..<tokens.count).allSatisfy {
+            tokens[$0].tokenClass == .separator || tokens[$0].tokenClass == .other
         }
 
+        guard isFinal,
+              let firstChar = lastToken.surface.lowercased().first,
+              rule.finalSemivowelsSet.contains(firstChar),
+              lastNucleusIdx > 0,
+              tokens[lastNucleusIdx - 1].tokenClass == .consonant
+        else { return nuclei }
+
+        nuclei.removeLast()
+        return nuclei
+    }
+
+    private static func addSyllabicConsonants(tokens: [Token], nuclei: [Int], rule: LanguageRule) -> [Int] {
+        guard !rule.syllabicConsonantSet.isEmpty && !nuclei.isEmpty else { return nuclei }
+
+        var syllabicNuclei: [Int] = []
+        for (i, token) in tokens.enumerated() {
+            guard token.tokenClass == .consonant,
+                  token.surface.count == 1,
+                  let char = token.surface.lowercased().first,
+                  rule.syllabicConsonantSet.contains(char),
+                  isSurroundedByConsonants(tokens: tokens, index: i),
+                  hasBufferToVowels(tokens: tokens, index: i)
+            else { continue }
+            syllabicNuclei.append(i)
+        }
+
+        guard !syllabicNuclei.isEmpty else { return nuclei }
+        return (Set(nuclei).union(Set(syllabicNuclei))).sorted()
+    }
+
+    private static func isSurroundedByConsonants(tokens: [Token], index: Int) -> Bool {
+        let prevIsConsonant = (index == 0) || (tokens[index - 1].tokenClass == .consonant)
+        let nextIsConsonant = (index == tokens.count - 1) || (tokens[index + 1].tokenClass == .consonant)
+        return prevIsConsonant && nextIsConsonant
+    }
+
+    private static func hasBufferToVowels(tokens: [Token], index: Int) -> Bool {
+        var distToPrevVowel = index + 1
+        for j in stride(from: index - 1, through: 0, by: -1) where tokens[j].tokenClass == .vowel {
+            distToPrevVowel = index - j
+            break
+        }
+
+        var distToNextVowel = tokens.count - index
+        for j in (index + 1)..<tokens.count where tokens[j].tokenClass == .vowel {
+            distToNextVowel = j - index
+            break
+        }
+
+        return distToPrevVowel > 1 && distToNextVowel > 1
+    }
+
+    private static func findFallbackSyllabicConsonants(tokens: [Token], rule: LanguageRule) -> [Int] {
+        var nuclei: [Int] = []
+        for (i, token) in tokens.enumerated() {
+            guard token.tokenClass == .consonant,
+                  token.surface.count == 1,
+                  let char = token.surface.lowercased().first,
+                  rule.syllabicConsonantSet.contains(char)
+            else { continue }
+            nuclei.append(i)
+        }
         return nuclei
     }
 
@@ -155,9 +196,56 @@ class WordSyllabifier {
         return false
     }
 
-    private func findBoundaryForSingleConsonant(_ clusterIndices: [Int]) -> Int {
+    private func findBoundaryForSingleConsonant(_ clusterIndices: [Int], nk: Int, nk1: Int) -> Int? {
         // V-CV: boundary before single consonant
-        return clusterIndices[0]
+        //
+        // Exception: Don't split V-r-e patterns (care, here, more) when:
+        // - At word end, OR
+        // - Before light suffixes (-s, -less, -ful, -ly, -ing, -ed)
+        //
+        // But split AFTER the consonant when followed by breaking suffixes (-ent, -ence, -ency, -ment):
+        // - parent -> par-ent, adherent -> ad-her-ent
+
+        let consonantIdx = clusterIndices[0]
+
+        // Check for protected sequences (like -are, -ere, -ore, -ure, -ire)
+        if !rule.finalSequencesKeepSet.isEmpty {
+            // Build the sequence from current vowel nucleus through next nucleus
+            let sequence = tokens[nk...nk1].map { $0.surface.lowercased() }.joined()
+
+            if rule.finalSequencesKeepSet.contains(sequence) {
+                // Get the rest of the word starting from next nucleus (includes the vowel)
+                let restWithVowel = tokens[nk1...].map { $0.surface.lowercased() }.joined()
+                let restAfterVowel = nk1 + 1 < tokens.count
+                    ? tokens[(nk1 + 1)...].map { $0.surface.lowercased() }.joined()
+                    : ""
+
+                // Check if followed by a breaking suffix (par-ent, ad-her-ent)
+                // The suffix starts from the next vowel: "ent" in "par-ent"
+                if !rule.suffixesBreakVreSet.isEmpty {
+                    for suffix in rule.suffixesBreakVreSet {
+                        if restWithVowel == suffix || restWithVowel.hasPrefix(suffix) {
+                            // Split after consonant = before next nucleus
+                            return nk1
+                        }
+                    }
+                }
+
+                // Check if at word end or followed by light suffix (care, care-less)
+                let isAtEnd = nk1 == tokens.count - 1
+                var hasLightSuffix = false
+                if !rule.suffixesKeepVreSet.isEmpty && !restAfterVowel.isEmpty {
+                    hasLightSuffix = rule.suffixesKeepVreSet.contains(restAfterVowel)
+                }
+
+                if isAtEnd || hasLightSuffix {
+                    // Don't split - return nil to indicate no boundary
+                    return nil
+                }
+            }
+        }
+
+        return consonantIdx
     }
 
     private func findBoundaryForTwoConsonants(
@@ -223,7 +311,7 @@ class WordSyllabifier {
             }
             return nil
         } else if cluster.count == 1 {
-            return findBoundaryForSingleConsonant(clusterIndices)
+            return findBoundaryForSingleConsonant(clusterIndices, nk: nk, nk1: nk1)
         } else if cluster.count == 2 {
             return findBoundaryForTwoConsonants(cluster, clusterIndices, prevNucleusIdx: nk)
         } else {
