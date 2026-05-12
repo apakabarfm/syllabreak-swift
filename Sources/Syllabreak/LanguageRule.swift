@@ -23,6 +23,17 @@ struct LanguageRule: Codable, Sendable {
     // individual words that escape the general rules (e.g. BCMS "dvije",
     // "prije" — graphic -ije- not from jat, see Matešić 2015 rule P11).
     let exceptions: [String: String]?
+    // Compact-form digraph geminates -> expanded form, applied before
+    // tokenisation. Hungarian writes long double digraphs in a simplified
+    // form (ssz=sz+sz, ggy=gy+gy, ...) but at a line break both halves
+    // are restored in full (asz-szony, meny-nyi).
+    let geminateDigraphs: [String: String]?
+
+    struct GeminateSpan {
+        let start: Int
+        let length: Int
+        let compactOriginal: String
+    }
 
     // Computed properties for sets
     var vowelSet: Set<Character> {
@@ -116,6 +127,7 @@ struct LanguageRule: Codable, Sendable {
         case suffixesBreakVre = "suffixes_break_vre"
         case suffixesKeepVre = "suffixes_keep_vre"
         case exceptions
+        case geminateDigraphs = "geminate_digraphs"
     }
 
     func isVowel(_ char: Character) -> Bool {
@@ -138,5 +150,62 @@ struct LanguageRule: Codable, Sendable {
 
         let matching = cleanText.filter { containsChar($0) }.count
         return Double(matching) / Double(cleanText.count)
+    }
+
+    /// Expand compact-form digraph geminates (Hungarian ssz, ggy, ...).
+    /// Returns the expanded string and a list of spans. Each span carries
+    /// (start_in_expanded, length_in_expanded, compact_original_text) so the
+    /// renderer can decide whether to keep the expanded form (when a boundary
+    /// falls inside) or restore the compact form (when it doesn't).
+    func expandGeminateDigraphs(_ word: String) -> (String, [GeminateSpan]) {
+        guard let geminates = geminateDigraphs, !geminates.isEmpty else {
+            return (word, [])
+        }
+        let patterns = geminates.sorted { $0.key.count > $1.key.count }
+        let wordChars = Array(word)
+        let wordLower = word.lowercased()
+        let lowerChars = Array(wordLower)
+        var result = ""
+        var spans: [GeminateSpan] = []
+        var i = 0
+        var expandedPos = 0
+        while i < wordChars.count {
+            var matched = false
+            for (short, long) in patterns {
+                let shortLen = short.count
+                if i + shortLen <= wordChars.count {
+                    let candidate = String(lowerChars[i..<(i + shortLen)])
+                    if candidate == short {
+                        let originalCompact = String(wordChars[i..<(i + shortLen)])
+                        let expansion: String
+                        if originalCompact == originalCompact.uppercased() {
+                            expansion = long.uppercased()
+                        } else if originalCompact.first?.isUppercase == true {
+                            let head = long.prefix(1).uppercased()
+                            let tail = long.dropFirst().lowercased()
+                            expansion = head + tail
+                        } else {
+                            expansion = long
+                        }
+                        spans.append(GeminateSpan(
+                            start: expandedPos,
+                            length: expansion.count,
+                            compactOriginal: originalCompact
+                        ))
+                        result += expansion
+                        expandedPos += expansion.count
+                        i += shortLen
+                        matched = true
+                        break
+                    }
+                }
+            }
+            if !matched {
+                result.append(wordChars[i])
+                expandedPos += 1
+                i += 1
+            }
+        }
+        return (result, spans)
     }
 }

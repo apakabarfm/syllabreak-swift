@@ -1,17 +1,22 @@
 import Foundation
 
 class WordSyllabifier {
-    private let word: String
-    private let rule: LanguageRule
-    private let softHyphen: String
-    private let tokens: [Token]
-    private let nuclei: [Int]
+    let originalWord: String
+    let word: String
+    let geminateSpans: [LanguageRule.GeminateSpan]
+    let rule: LanguageRule
+    let softHyphen: String
+    let tokens: [Token]
+    let nuclei: [Int]
 
     init(word: String, rule: LanguageRule, softHyphen: String) {
-        self.word = word
+        self.originalWord = word
+        let (expanded, spans) = rule.expandGeminateDigraphs(word)
+        self.word = expanded
+        self.geminateSpans = spans
         self.rule = rule
         self.softHyphen = softHyphen
-        self.tokens = WordSyllabifier.tokenize(word: word, rule: rule)
+        self.tokens = WordSyllabifier.tokenize(word: expanded, rule: rule)
         self.nuclei = WordSyllabifier.findNuclei(tokens: tokens, rule: rule)
     }
 
@@ -334,48 +339,21 @@ class WordSyllabifier {
     }
 
     func syllabify() -> String {
-        // Perform syllabification and return the word with soft hyphens
-        if let exceptionSplit = rule.exceptions?[word.lowercased()] {
+        if let exceptionSplit = rule.exceptions?[originalWord.lowercased()] {
             return applyException(exceptionSplit)
         }
 
+        // When the word doesn't actually split, hand back the original surface
+        // so any geminate-digraph expansion isn't visible to the caller.
         if nuclei.count < 2 {
-            return word
+            return originalWord
         }
 
         let boundaries = placeBoundaries()
         if boundaries.isEmpty {
-            return word
+            return originalWord
         }
 
-        var result: [String] = []
-        let boundarySet = Set(boundaries)
-
-        for (i, token) in tokens.enumerated() {
-            if boundarySet.contains(i) {
-                result.append(softHyphen)
-            }
-            result.append(token.surface)
-        }
-
-        return result.joined()
-    }
-}
-
-private extension WordSyllabifier {
-    // Render an exception's hyphen-marked lowercase split using self.word's case.
-    func applyException(_ splitLower: String) -> String {
-        var result = ""
-        let wordChars = Array(word)
-        var srcIdx = 0
-        for ch in splitLower {
-            if ch == "-" {
-                result += softHyphen
-            } else {
-                result.append(wordChars[srcIdx])
-                srcIdx += 1
-            }
-        }
-        return result
+        return renderWithGeminateSpans(boundaries: boundaries)
     }
 }

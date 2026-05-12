@@ -17,6 +17,7 @@ This is a Swift port of [syllabreak-python](https://github.com/apakabarlabs/syll
 - 🇲🇪 Montenegrin Cyrillic (`cnr-cyrl`)
 - 🇹🇷 Turkish (`tur`)
 - 🇬🇪 Georgian (`kat`)
+- 🇭🇺 Hungarian (`hun`)
 - 🇩🇪 German (`deu`)
 - 🇫🇷 French (`fra`)
 - 🇷🇴 Romanian (`ron`)
@@ -36,6 +37,7 @@ A few language-specific quirks the algorithm has to encode. Each one would other
 - **German** — `st` between vowels splits after a short nucleus but stays together after a long one.
 - **Latin** — hiatus is mandatory.
 - **Polish** — digraphs `sz`, `cz`, `rz`, `dz`, `ch` stay together.
+- **Hungarian** — only one consonant moves to the next syllable, so even valid onset clusters split (`ab-lak`, not `a-blak`). Geminate digraphs (`ssz`, `ggy`, `nny`, `lly`, `tty`, `ccs`, `zzs`, `ddz`, `ddzs`) are written compactly and restored in full at the break per AkH 12 §226 (`asz-szony`, `meny-nyi`).
 - **BCMS** — syllabic `r` between consonants is a syllable nucleus: `prst` and `krv` are one syllable.
 - **Georgian** — no digraphs; consonant sequences split unless on a small whitelist of valid onsets.
 
@@ -47,7 +49,7 @@ Swift Package Manager:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/apakabarlabs/syllabreak-swift", from: "0.5.2")
+    .package(url: "https://github.com/apakabarlabs/syllabreak-swift", from: "0.6.0")
 ]
 ```
 

@@ -77,7 +77,8 @@ class Tokenizer {
     }
 
     private func tryMatchConsonantDigraph() -> Bool {
-        for length in [2, 1] {
+        // Length 3 supports trigraphs like Hungarian "dzs" and German "sch".
+        for length in [3, 2, 1] {
             if pos + length > word.count {
                 continue
             }
