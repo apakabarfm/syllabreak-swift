@@ -104,7 +104,8 @@ class Tokenizer {
     }
 
     private func tryMatchVowelDigraph() -> Bool {
-        for length in [2, 1] {
+        // Length 3 supports trigraphs like BCMS "ije" / "ије" (long-jat reflex).
+        for length in [3, 2, 1] {
             if pos + length > word.count {
                 continue
             }

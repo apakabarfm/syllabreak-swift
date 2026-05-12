@@ -96,6 +96,161 @@ tests:
       - text: "smrtno"
         want: "smrt-no"
   
+  - section: "Bosnian"
+    lang: "bos"
+    cases:
+      # Long-jat "ije" is one syllable (Matešić 2015 rule P11;
+      # https://hrcak.srce.hr/file/244984).
+      - text: "lijep"
+        want: "lijep"
+      - text: "mlijeko"
+        want: "mlije-ko"
+      - text: "snijeg"
+        want: "snijeg"
+      # Short-jat "je" is consonant+vowel, naturally one syllable.
+      - text: "hljeb"
+        want: "hljeb"
+      # P11 exceptions — graphic -ije- not from jat; handled via `exceptions`.
+      - text: "dvije"
+        want: "dvi-je"
+      - text: "prije"
+        want: "pri-je"
+      # General BCMS lexicon
+      - text: "ćevapi"
+        want: "će-va-pi"
+      - text: "bosanski"
+        want: "bo-san-ski"
+      - text: "računar"
+        want: "ra-ču-nar"
+      - text: "njegov"
+        want: "nje-gov"
+      - text: "učitelj"
+        want: "u-či-telj"
+      # "dj" as two phonemes [d]+[j], not a digraph for đ
+      - text: "odjenuti"
+        want: "od-je-nu-ti"
+
+  - section: "Croatian"
+    lang: "hrv"
+    cases:
+      # Long-jat "ije" — one syllable
+      - text: "lijepo"
+        want: "lije-po"
+      - text: "vrijeme"
+        want: "vrije-me"
+      - text: "mlijeko"
+        want: "mlije-ko"
+      - text: "snijeg"
+        want: "snijeg"
+      # P11 exceptions
+      - text: "dvije"
+        want: "dvi-je"
+      - text: "prije"
+        want: "pri-je"
+      # Croatian-specific lexicon
+      - text: "računalo"
+        want: "ra-ču-na-lo"
+      - text: "zrakoplov"
+        want: "zra-ko-plov"
+      # Digraphs
+      - text: "njegov"
+        want: "nje-gov"
+      - text: "ljubav"
+        want: "lju-bav"
+      # "dj" as two phonemes (Croatian linguistic norm)
+      - text: "djelo"
+        want: "dje-lo"
+      - text: "odjeća"
+        want: "od-je-ća"
+      # "dj" as two phonemes in multi-syllable words
+      - text: "nadjačati"
+        want: "nad-ja-ča-ti"
+      - text: "odjednom"
+        want: "od-jed-nom"
+      # Case preservation: exceptions look up lowercase, render with original case
+      - text: "DVIJE"
+        want: "DVI-JE"
+      - text: "Prije"
+        want: "Pri-je"
+      # Case preservation: "ije" digraph tokenizes against lowercased text but
+      # keeps the original surface
+      - text: "MLIJEKO"
+        want: "MLIJE-KO"
+      - text: "Lijepo"
+        want: "Lije-po"
+
+  - section: "Montenegrin Latin"
+    lang: "cnr-latn"
+    cases:
+      # Words with Montenegrin-specific letters ś, ź (introduced 2009)
+      - text: "śutra"
+        want: "śu-tra"
+      - text: "paśji"
+        want: "paś-ji"
+      - text: "iźede"
+        want: "i-źe-de"
+      - text: "pośteno"
+        want: "poś-te-no"
+      # Long-jat works the same way as in hrv/bos (ijekavian)
+      - text: "lijepo"
+        want: "lije-po"
+      # Standard BCMS words
+      - text: "računar"
+        want: "ra-ču-nar"
+      - text: "njegov"
+        want: "nje-gov"
+      # "dj" as two phonemes
+      - text: "odjenuti"
+        want: "od-je-nu-ti"
+      # Case preservation on Montenegrin-specific letters
+      - text: "Śutra"
+        want: "Śu-tra"
+      - text: "IŹEDE"
+        want: "I-ŹE-DE"
+
+  - section: "Montenegrin Cyrillic"
+    lang: "cnr-cyrl"
+    cases:
+      # Words with Montenegrin-specific decomposed letters с́, з́
+      # (base letter + combining acute U+0301)
+      - text: "с́утра"
+        want: "с́у-тра"
+      - text: "пас́ји"
+        want: "пас́-ји"
+      - text: "из́еде"
+        want: "и-з́е-де"
+      # Long-jat "ије" is one syllable
+      - text: "лијепо"
+        want: "лије-по"
+      # Standard BCMS words
+      - text: "рачунар"
+        want: "ра-чу-нар"
+      - text: "његов"
+        want: "ње-гов"
+      - text: "учитељ"
+        want: "у-чи-тељ"
+      # Case preservation with the decomposed combining acute
+      - text: "С́утра"
+        want: "С́у-тра"
+      - text: "ПАС́ЈИ"
+        want: "ПАС́-ЈИ"
+      # Punctuation must not break the word at the combining acute —
+      # rule.is_word_char keeps U+0301 inside the word, comma/parens outside
+      - text: "с́утра,"
+        want: "с́у-тра,"
+      - text: "(с́утра)"
+        want: "(с́у-тра)"
+      # Case preservation: exceptions in Cyrillic
+      - text: "ДВИЈЕ"
+        want: "ДВИ-ЈЕ"
+      - text: "Прије"
+        want: "При-је"
+      # Case preservation: "ије" digraph
+      - text: "МЛИЈЕКО"
+        want: "МЛИЈЕ-КО"
+      - text: "Лијепо"
+        want: "Лије-по"
+
   - section: "Serbian Latin (autodetect)"
     lang: null
     cases:

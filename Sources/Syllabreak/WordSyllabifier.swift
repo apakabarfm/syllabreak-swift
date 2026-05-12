@@ -335,6 +335,10 @@ class WordSyllabifier {
 
     func syllabify() -> String {
         // Perform syllabification and return the word with soft hyphens
+        if let exceptionSplit = rule.exceptions?[word.lowercased()] {
+            return applyException(exceptionSplit)
+        }
+
         if nuclei.count < 2 {
             return word
         }
@@ -355,5 +359,23 @@ class WordSyllabifier {
         }
 
         return result.joined()
+    }
+}
+
+private extension WordSyllabifier {
+    // Render an exception's hyphen-marked lowercase split using self.word's case.
+    func applyException(_ splitLower: String) -> String {
+        var result = ""
+        let wordChars = Array(word)
+        var srcIdx = 0
+        for ch in splitLower {
+            if ch == "-" {
+                result += softHyphen
+            } else {
+                result.append(wordChars[srcIdx])
+                srcIdx += 1
+            }
+        }
+        return result
     }
 }

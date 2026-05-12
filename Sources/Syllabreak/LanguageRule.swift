@@ -19,6 +19,10 @@ struct LanguageRule: Codable, Sendable {
     let finalSequencesKeep: [String]?
     let suffixesBreakVre: [String]?
     let suffixesKeepVre: [String]?
+    // Lowercased word -> hyphen-marked split. Overrides the algorithm for
+    // individual words that escape the general rules (e.g. BCMS "dvije",
+    // "prije" — graphic -ije- not from jat, see Matešić 2015 rule P11).
+    let exceptions: [String: String]?
 
     // Computed properties for sets
     var vowelSet: Set<Character> {
@@ -111,6 +115,7 @@ struct LanguageRule: Codable, Sendable {
         case finalSequencesKeep = "final_sequences_keep"
         case suffixesBreakVre = "suffixes_break_vre"
         case suffixesKeepVre = "suffixes_keep_vre"
+        case exceptions
     }
 
     func isVowel(_ char: Character) -> Bool {
