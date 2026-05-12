@@ -47,7 +47,7 @@ Swift Package Manager:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/apakabarlabs/syllabreak-swift", from: "0.5.1")
+    .package(url: "https://github.com/apakabarlabs/syllabreak-swift", from: "0.5.2")
 ]
 ```
 
@@ -81,6 +81,13 @@ This is useful when:
 - The text could match multiple languages
 - You want consistent rules for a specific language
 - Processing text in a known language
+
+### Listing supported languages
+
+```swift
+let s = Syllabreak()
+print(s.supportedLanguages())  // ["eng", "rus", "srp-cyrl", ...]
+```
 
 ### Language detection
 

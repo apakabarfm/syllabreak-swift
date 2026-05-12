@@ -24,6 +24,11 @@ public final class Syllabreak: Sendable {
         return matchingRules.map { $0.lang }
     }
 
+    /// Codes of every language the loaded rules cover, in rule-file order.
+    public func supportedLanguages() -> [String] {
+        metaRule.rules.map { $0.lang }
+    }
+
     private func autoDetectRule(_ text: String) -> LanguageRule? {
         let matchingRules = metaRule.findMatches(text)
         return matchingRules.first
