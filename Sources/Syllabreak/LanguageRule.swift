@@ -6,6 +6,13 @@ struct LanguageRule: Codable, Sendable {
     let consonants: String
     let sonorants: String
     let clustersKeepNext: [String]?
+    // trailing_onsets — onsets valid ONLY in trailing position of a 3+
+    // consonant cluster. Used for Dutch where s+stop splits as VC-CV in
+    // a plain 2-cons cluster (kas-teel) but stays together as the next
+    // syllable's onset when preceded by another consonant (ven-ster,
+    // in-dus-trie). Checked alongside clustersKeepNext inside the 3+
+    // cluster boundary decision.
+    let trailingOnsets: [String]?
     let dontSplitDigraphs: [String]?
     let digraphVowels: [String]?
     let glides: String?
@@ -53,6 +60,7 @@ struct LanguageRule: Codable, Sendable {
     // so entries with precomposed letters (deu "üh", grc "αἰ") still match
     // when input has been NFD-normalised.
     var clustersKeepNextSet: Set<String> { Self.augmentStrings(clustersKeepNext) }
+    var trailingOnsetsSet: Set<String> { Self.augmentStrings(trailingOnsets) }
     var dontSplitDigraphsSet: Set<String> { Self.augmentStrings(dontSplitDigraphs) }
     var digraphVowelsSet: Set<String> { Self.augmentStrings(digraphVowels) }
     var clustersOnlyAfterLongSet: Set<String> { Self.augmentStrings(clustersOnlyAfterLong) }
@@ -97,6 +105,7 @@ struct LanguageRule: Codable, Sendable {
         case consonants
         case sonorants
         case clustersKeepNext = "clusters_keep_next"
+        case trailingOnsets = "trailing_onsets"
         case dontSplitDigraphs = "dont_split_digraphs"
         case digraphVowels = "digraph_vowels"
         case glides

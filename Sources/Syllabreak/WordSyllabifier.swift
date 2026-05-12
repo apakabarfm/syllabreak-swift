@@ -163,7 +163,12 @@ class WordSyllabifier {
         return extractConsonantCluster(left: left, right: right)
     }
 
-    private func isValidOnset(_ consonant1: String, _ consonant2: String, prevNucleusIdx: Int? = nil) -> Bool {
+    private func isValidOnset(
+        _ consonant1: String,
+        _ consonant2: String,
+        prevNucleusIdx: Int? = nil,
+        includeTrailingOnsets: Bool = false
+    ) -> Bool {
         let onsetCandidate = consonant1.lowercased() + consonant2.lowercased()
 
         // Check if this cluster requires a long vowel before it
@@ -174,7 +179,13 @@ class WordSyllabifier {
             }
         }
 
-        return rule.clustersKeepNextSet.contains(onsetCandidate)
+        if rule.clustersKeepNextSet.contains(onsetCandidate) {
+            return true
+        }
+        if includeTrailingOnsets && rule.trailingOnsetsSet.contains(onsetCandidate) {
+            return true
+        }
+        return false
     }
 
     private func isLongNucleus(_ nucleusIdx: Int) -> Bool {
@@ -280,7 +291,7 @@ class WordSyllabifier {
                     cluster[cluster.count - 2].surface +
                     cluster[cluster.count - 1].surface
             ).lowercased()
-            if rule.clustersKeepNextSet.contains(onset3) {
+            if rule.clustersKeepNextSet.contains(onset3) || rule.trailingOnsetsSet.contains(onset3) {
                 return clusterIndices[clusterIndices.count - 3]
             }
         }
@@ -289,7 +300,8 @@ class WordSyllabifier {
         if cluster.count >= 2 && isValidOnset(
             cluster[cluster.count - 2].surface,
             cluster[cluster.count - 1].surface,
-            prevNucleusIdx: prevNucleusIdx
+            prevNucleusIdx: prevNucleusIdx,
+            includeTrailingOnsets: true
         ) {
             boundaryIdx = clusterIndices[clusterIndices.count - 2]
         }
