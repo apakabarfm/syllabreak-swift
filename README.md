@@ -30,6 +30,7 @@ This is a Swift port of [syllabreak-python](https://github.com/apakabarlabs/syll
 - 🇵🇱 Polish (`pol`)
 - 🇱🇻 Latvian (`lav`)
 - 🇦🇲 Armenian (`hye`)
+- 🇫🇮 Finnish (`fin`)
 - 🏛️ Latin (`lat`)
 
 ## Why syllabification isn't trivial
@@ -47,6 +48,7 @@ A few language-specific quirks the algorithm has to encode. Each one would other
 - **Turkic Cyrillic (kaz, kir)** — strict VC-CV: only one consonant moves to the next syllable, three-consonant clusters split 2|1. Kyrgyz long vowels (`аа`, `ээ`, `оо`, `ии`, `уу`, `өө`, `үү`) form a single nucleus (`буу-дай`).
 - **Latvian** — V-CV/VC-CV with muta-cum-liquida kept (`la-brīt`). Diphthongs `ai`, `au`, `ei`, `ie`, `iu`, `oi`, `ui`, `eu`, `ou` form a single nucleus. Macron vowels are shared with Latin, so detection without a cedilla letter (`ļ`, `ķ`, `ģ`, `ņ`) keeps `lat` first.
 - **Armenian** — strict V-CV/VC-CV (Oxford: "Word-internally, -CC- is perceived as a natural syllable boundary"). Three-consonant clusters split CC|C by the same default long-cluster rule used for Turkic/Hungarian-style strict VC-CV languages. No `clusters_keep_next`; native phonotactics disallow CCV- onsets. `ու` is a single vowel digraph; `և` (yev) counts as one vowel-bearing letter. Pronounced schwa between written consonants (`դպրոց` → [də.pə.rɔts]) is not orthographic.
+- **Finnish** — strict V-CV/VC-CV per VISK §11–14 and Karlsson (1999). Long vowels and i/u/y-ending diphthongs are single nuclei in any position; opening diphthongs (`ie uo yö`) are formally root-initial only but treated as one nucleus everywhere. Any 3+ vowel sequence splits as hiatus. Auto-detect caveat: the Finnish alphabet is a subset of German's — pass `lang="fin"` explicitly.
 - **Modern Greek** — V-CV; consonant clusters keep with the following nucleus up to length 3 if they form a valid Greek onset (`βι-βλί-ο`, `ά-στρο`, `συ-γκρί-νω`). Vowel digraphs αι/ει/οι/υι/αυ/ευ/ηυ/ου in all accent positions; consonant digraphs μπ/ντ/γκ/γγ/τζ/τσ as one consonant. Orthographic policy — synizesis is NOT applied.
 - **BCMS** — syllabic `r` between consonants is a syllable nucleus: `prst` and `krv` are one syllable.
 - **Georgian** — no digraphs; consonant sequences split unless on a small whitelist of valid onsets.
@@ -59,7 +61,7 @@ Swift Package Manager:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/apakabarlabs/syllabreak-swift", from: "0.11.0")
+    .package(url: "https://github.com/apakabarlabs/syllabreak-swift", from: "0.12.0")
 ]
 ```
 
