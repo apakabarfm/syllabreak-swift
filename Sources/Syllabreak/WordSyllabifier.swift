@@ -271,9 +271,21 @@ class WordSyllabifier {
         _ clusterIndices: [Int],
         prevNucleusIdx: Int? = nil
     ) -> Int {
-        // Determine boundary for cluster with 3+ consonants
-        var boundaryIdx = clusterIndices[clusterIndices.count - 1]
+        // Determine boundary for cluster with 3+ consonants. Try the last
+        // THREE consonants as a single onset first (Greek στρ in ά-στρο);
+        // fall back to the 2-letter check.
+        if cluster.count >= 3 {
+            let onset3 = (
+                cluster[cluster.count - 3].surface +
+                    cluster[cluster.count - 2].surface +
+                    cluster[cluster.count - 1].surface
+            ).lowercased()
+            if rule.clustersKeepNextSet.contains(onset3) {
+                return clusterIndices[clusterIndices.count - 3]
+            }
+        }
 
+        var boundaryIdx = clusterIndices[clusterIndices.count - 1]
         if cluster.count >= 2 && isValidOnset(
             cluster[cluster.count - 2].surface,
             cluster[cluster.count - 1].surface,
