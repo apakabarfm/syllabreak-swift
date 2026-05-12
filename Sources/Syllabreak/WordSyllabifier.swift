@@ -94,19 +94,24 @@ class WordSyllabifier {
     }
 
     private static func hasBufferToVowels(tokens: [Token], index: Int) -> Bool {
-        var distToPrevVowel = index + 1
+        // "No vowel at all on this side" (a word-initial or word-final
+        // run of consonants) counts as the buffer being satisfied —
+        // Swahili m-toto, BCMS prst/vrh.
+        var distToPrevVowel: Int? = nil
         for j in stride(from: index - 1, through: 0, by: -1) where tokens[j].tokenClass == .vowel {
             distToPrevVowel = index - j
             break
         }
 
-        var distToNextVowel = tokens.count - index
+        var distToNextVowel: Int? = nil
         for j in (index + 1)..<tokens.count where tokens[j].tokenClass == .vowel {
             distToNextVowel = j - index
             break
         }
 
-        return distToPrevVowel > 1 && distToNextVowel > 1
+        let hasBufferBefore = distToPrevVowel.map { $0 > 1 } ?? true
+        let hasBufferAfter = distToNextVowel.map { $0 > 1 } ?? true
+        return hasBufferBefore && hasBufferAfter
     }
 
     private static func findFallbackSyllabicConsonants(tokens: [Token], rule: LanguageRule) -> [Int] {
