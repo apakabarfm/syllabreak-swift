@@ -20,7 +20,10 @@ public final class Syllabreak: Sendable {
     }
 
     public func detectLanguage(_ text: String) -> [String] {
-        let matchingRules = metaRule.findMatches(text)
+        // Detect on NFC-normalised text so precomposed letters (Polish ą,
+        // deu ä, polytonic Greek ἤ …) discriminate via each rule's
+        // uniqueChars set, whatever form the caller hands us.
+        let matchingRules = metaRule.findMatches(text.precomposedStringWithCanonicalMapping)
         return matchingRules.map { $0.lang }
     }
 
@@ -54,7 +57,7 @@ public final class Syllabreak: Sendable {
             }
             rule = foundRule
         } else {
-            rule = autoDetectRule(text)
+            rule = autoDetectRule(text.precomposedStringWithCanonicalMapping)
             if rule == nil {
                 return text
             }
@@ -64,20 +67,22 @@ public final class Syllabreak: Sendable {
             return text
         }
 
-        // Process each word
+        // Work on the NFD form so combining marks (polytonic Greek, BCMS
+        // с́, etc.) sit as their own codepoints. Renormalise the result
+        // back to NFC before returning so callers see the canonical form.
+        let nfdText = text.decomposedStringWithCanonicalMapping
+
         var result: [String] = []
         var i = 0
-        let chars = Array(text)
+        let chars = Array(nfdText)
 
         while i < chars.count {
-            // Find word boundaries
             if !chars[i].isLetter {
                 result.append(String(chars[i]))
                 i += 1
                 continue
             }
 
-            // Found start of word
             let wordStart = i
             while i < chars.count && chars[i].isLetter {
                 i += 1
@@ -88,6 +93,6 @@ public final class Syllabreak: Sendable {
             result.append(syllabifiedWord)
         }
 
-        return result.joined()
+        return result.joined().precomposedStringWithCanonicalMapping
     }
 }

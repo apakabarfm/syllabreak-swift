@@ -1,20 +1,22 @@
 import Foundation
 
 class Tokenizer {
-    private let word: String
-    private let wordLower: String
+    private let wordScalars: [Unicode.Scalar]
+    private let scalars: [Unicode.Scalar]
     private let rule: LanguageRule
     private var tokens: [Token] = []
     private var pos = 0
 
+    private static let combiningDiaeresis: Unicode.Scalar = "\u{0308}"
+
     init(word: String, rule: LanguageRule) {
-        self.word = word
-        self.wordLower = word.lowercased()
+        self.wordScalars = Array(word.unicodeScalars)
+        self.scalars = Array(word.lowercased().unicodeScalars)
         self.rule = rule
     }
 
     func tokenize() -> [Token] {
-        while pos < word.count {
+        while pos < scalars.count {
             if tryMatchLeftModifier() {
                 continue
             }
@@ -32,21 +34,37 @@ class Tokenizer {
         return tokens
     }
 
+    private func surface(start: Int, end: Int) -> String {
+        String(String.UnicodeScalarView(wordScalars[start..<end]))
+    }
+
+    private func charAtLower(_ index: Int) -> Character {
+        Character(scalars[index])
+    }
+
+    private static func isNonspacingMark(_ scalar: Unicode.Scalar) -> Bool {
+        scalar.properties.generalCategory == .nonspacingMark
+    }
+
     private func tryMatchLeftModifier() -> Bool {
-        let char = wordLower[wordLower.index(wordLower.startIndex, offsetBy: pos)]
-        if !rule.modifiersAttachLeftSet.contains(char) {
+        let scalar = scalars[pos]
+        let char = Character(scalar)
+        // Explicit list from the rule, plus any Unicode nonspacing mark —
+        // the Mn fallback covers polytonic Greek breathings / accents /
+        // iota subscript and any other combining mark transparently.
+        let attaches = rule.modifiersAttachLeftSet.contains(char) || Self.isNonspacingMark(scalar)
+        if !attaches {
             return false
         }
 
         if !tokens.isEmpty {
-            let wordChar = word[word.index(word.startIndex, offsetBy: pos)]
-            tokens[tokens.count - 1].surface += String(wordChar)
+            tokens[tokens.count - 1].surface += surface(start: pos, end: pos + 1)
             tokens[tokens.count - 1].endIdx = pos + 1
             tokens[tokens.count - 1].isModifier = true
         } else {
             tokens.append(
                 Token(
-                    surface: String(word[word.index(word.startIndex, offsetBy: pos)]),
+                    surface: surface(start: pos, end: pos + 1),
                     tokenClass: .other,
                     isModifier: true,
                     startIdx: pos,
@@ -59,14 +77,14 @@ class Tokenizer {
     }
 
     private func tryMatchSeparator() -> Bool {
-        let char = wordLower[wordLower.index(wordLower.startIndex, offsetBy: pos)]
+        let char = charAtLower(pos)
         if !rule.modifiersSeparatorsSet.contains(char) {
             return false
         }
 
         tokens.append(
             Token(
-                surface: String(word[word.index(word.startIndex, offsetBy: pos)]),
+                surface: surface(start: pos, end: pos + 1),
                 tokenClass: .separator,
                 startIdx: pos,
                 endIdx: pos + 1
@@ -77,55 +95,108 @@ class Tokenizer {
     }
 
     private func tryMatchConsonantDigraph() -> Bool {
-        // Length 3 supports trigraphs like Hungarian "dzs" and German "sch".
+        tryMatchDigraph(source: rule.dontSplitDigraphsSet, tokenClass: .consonant)
+    }
+
+    private func tryMatchVowelDigraph() -> Bool {
+        tryMatchDigraph(source: rule.digraphVowelsSet, tokenClass: .vowel)
+    }
+
+    private func tryMatchDigraph(source: Set<String>, tokenClass: TokenClass) -> Bool {
+        // Direct substring match (catches entries whose marks sit on a
+        // vowel that is part of the digraph itself, e.g. deu "üh").
         for length in [3, 2, 1] {
-            if pos + length > word.count {
+            let end = pos + length
+            if end > scalars.count {
                 continue
             }
-            let startIdx = wordLower.index(wordLower.startIndex, offsetBy: pos)
-            let endIdx = wordLower.index(startIdx, offsetBy: length)
-            let substr = String(wordLower[startIdx..<endIdx])
-
-            if rule.dontSplitDigraphsSet.contains(substr) {
-                let wordStartIdx = word.index(word.startIndex, offsetBy: pos)
-                let wordEndIdx = word.index(wordStartIdx, offsetBy: length)
-                tokens.append(
-                    Token(
-                        surface: String(word[wordStartIdx..<wordEndIdx]),
-                        tokenClass: .consonant,
-                        startIdx: pos,
-                        endIdx: pos + length
-                    )
-                )
-                pos += length
+            let substr = String(String.UnicodeScalarView(scalars[pos..<end]))
+            if source.contains(substr) && !diaeresisVetoesAt(end) {
+                addDigraphToken(end: end, tokenClass: tokenClass)
+                pos = end
                 return true
             }
+        }
+
+        // Mn-skipping fallback (catches breath/accent between two base
+        // letters of a diphthong, e.g. Greek "ἀι" = α + U+0313 + ι).
+        let positions = scanBases()
+        if positions.isEmpty {
+            return false
+        }
+        let bases = basesAtPositions(positions)
+        for length in [3, 2, 1] where bases.count >= length {
+            let candidate = bases.prefix(length).map(String.init).joined()
+            if !source.contains(candidate) {
+                continue
+            }
+            let end = positions[length - 1]
+            if diaeresisVetoesAt(end) {
+                continue
+            }
+            addDigraphToken(end: end, tokenClass: tokenClass)
+            pos = end
+            return true
         }
         return false
     }
 
-    private func tryMatchVowelDigraph() -> Bool {
-        // Length 3 supports trigraphs like BCMS "ije" / "ије" (long-jat reflex).
-        for length in [3, 2, 1] {
-            if pos + length > word.count {
+    private func addDigraphToken(end: Int, tokenClass: TokenClass) {
+        let isGlide: Bool
+        if tokenClass == .vowel {
+            let scalarSlice = scalars[pos..<end]
+            isGlide = scalarSlice.contains { rule.glideSet.contains(Character($0)) }
+        } else {
+            isGlide = false
+        }
+        tokens.append(
+            Token(
+                surface: surface(start: pos, end: end),
+                tokenClass: tokenClass,
+                isGlide: isGlide,
+                startIdx: pos,
+                endIdx: end
+            )
+        )
+    }
+
+    private func scanBases() -> [Int] {
+        // End-positions of up to 3 upcoming base letters, skipping Mn marks.
+        var positions: [Int] = []
+        var p = pos
+        while p < scalars.count && positions.count < 3 {
+            if Self.isNonspacingMark(scalars[p]) {
+                p += 1
                 continue
             }
-            let startIdx = wordLower.index(wordLower.startIndex, offsetBy: pos)
-            let endIdx = wordLower.index(startIdx, offsetBy: length)
-            let substr = String(wordLower[startIdx..<endIdx])
+            positions.append(p + 1)
+            p += 1
+        }
+        return positions
+    }
 
-            if rule.digraphVowelsSet.contains(substr) {
-                let wordStartIdx = word.index(word.startIndex, offsetBy: pos)
-                let wordEndIdx = word.index(wordStartIdx, offsetBy: length)
-                tokens.append(
-                    Token(
-                        surface: String(word[wordStartIdx..<wordEndIdx]),
-                        tokenClass: .vowel,
-                        startIdx: pos,
-                        endIdx: pos + length
-                    )
-                )
-                pos += length
+    private func basesAtPositions(_ positions: [Int]) -> [Character] {
+        var chars: [Character] = []
+        for (idx, end) in positions.enumerated() {
+            let start = idx == 0 ? pos : positions[idx - 1]
+            for q in stride(from: end - 1, through: start, by: -1)
+                where !Self.isNonspacingMark(scalars[q]) {
+                chars.append(Character(scalars[q]))
+                break
+            }
+        }
+        return chars
+    }
+
+    private func diaeresisVetoesAt(_ endPos: Int) -> Bool {
+        // Diaeresis (U+0308) attached to the closing base of a candidate
+        // digraph signals hiatus, not a diphthong (αϊ / Μαΐου / naïf).
+        for p in endPos..<scalars.count {
+            let scalar = scalars[p]
+            if !Self.isNonspacingMark(scalar) {
+                return false
+            }
+            if scalar == Self.combiningDiaeresis {
                 return true
             }
         }
@@ -133,39 +204,30 @@ class Tokenizer {
     }
 
     private func addSingleCharacterToken() {
-        let char = wordLower[wordLower.index(wordLower.startIndex, offsetBy: pos)]
-        let wordChar = word[word.index(word.startIndex, offsetBy: pos)]
+        let scalar = scalars[pos]
+        let char = Character(scalar)
+
+        let tokenClass: TokenClass
+        var isGlide = false
 
         if rule.vowelSet.contains(char) {
-            tokens.append(
-                Token(
-                    surface: String(wordChar),
-                    tokenClass: .vowel,
-                    startIdx: pos,
-                    endIdx: pos + 1
-                )
-            )
+            tokenClass = .vowel
         } else if rule.consonantSet.contains(char) || rule.glideSet.contains(char) || rule.sonorantSet.contains(char) {
-            let isGlide = rule.glideSet.contains(char)
-            tokens.append(
-                Token(
-                    surface: String(wordChar),
-                    tokenClass: .consonant,
-                    isGlide: isGlide,
-                    startIdx: pos,
-                    endIdx: pos + 1
-                )
-            )
+            tokenClass = .consonant
+            isGlide = rule.glideSet.contains(char)
         } else {
-            tokens.append(
-                Token(
-                    surface: String(wordChar),
-                    tokenClass: .other,
-                    startIdx: pos,
-                    endIdx: pos + 1
-                )
-            )
+            tokenClass = .other
         }
+
+        tokens.append(
+            Token(
+                surface: surface(start: pos, end: pos + 1),
+                tokenClass: tokenClass,
+                isGlide: isGlide,
+                startIdx: pos,
+                endIdx: pos + 1
+            )
+        )
         pos += 1
     }
 }

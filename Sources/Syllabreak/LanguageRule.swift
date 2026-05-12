@@ -35,73 +35,57 @@ struct LanguageRule: Codable, Sendable {
         let compactOriginal: String
     }
 
-    // Computed properties for sets
-    var vowelSet: Set<Character> {
-        Set(vowels)
-    }
+    // Character sets are augmented with the NFD base of each precomposed
+    // letter (combining marks filtered out). This lets a NFD-normalised
+    // input — what the tokenizer sees inside syllabify() — match against
+    // the base letter that the YAML lists in precomposed form.
+    var vowelSet: Set<Character> { Self.augmentChars(vowels) }
+    var consonantSet: Set<Character> { Self.augmentChars(consonants) }
+    var sonorantSet: Set<Character> { Self.augmentChars(sonorants) }
+    var glideSet: Set<Character> { Self.augmentChars(glides ?? "") }
+    var syllabicConsonantSet: Set<Character> { Self.augmentChars(syllabicConsonants ?? "") }
+    var modifiersAttachLeftSet: Set<Character> { Self.augmentChars(modifiersAttachLeft ?? "") }
+    var modifiersAttachRightSet: Set<Character> { Self.augmentChars(modifiersAttachRight ?? "") }
+    var modifiersSeparatorsSet: Set<Character> { Self.augmentChars(modifiersSeparators ?? "") }
+    var finalSemivowelsSet: Set<Character> { Self.augmentChars(finalSemivowels ?? "") }
 
-    var consonantSet: Set<Character> {
-        Set(consonants)
-    }
-
-    var sonorantSet: Set<Character> {
-        Set(sonorants)
-    }
-
-    var clustersKeepNextSet: Set<String> {
-        Set(clustersKeepNext ?? [])
-    }
-
-    var dontSplitDigraphsSet: Set<String> {
-        Set(dontSplitDigraphs ?? [])
-    }
-
-    var digraphVowelsSet: Set<String> {
-        Set(digraphVowels ?? [])
-    }
-
-    var glideSet: Set<Character> {
-        Set(glides ?? "")
-    }
-
-    var syllabicConsonantSet: Set<Character> {
-        Set(syllabicConsonants ?? "")
-    }
-
-    var modifiersAttachLeftSet: Set<Character> {
-        Set(modifiersAttachLeft ?? "")
-    }
-
-    var modifiersAttachRightSet: Set<Character> {
-        Set(modifiersAttachRight ?? "")
-    }
-
-    var modifiersSeparatorsSet: Set<Character> {
-        Set(modifiersSeparators ?? "")
-    }
-
-    var clustersOnlyAfterLongSet: Set<String> {
-        Set(clustersOnlyAfterLong ?? [])
-    }
-
-    var finalSemivowelsSet: Set<Character> {
-        Set(finalSemivowels ?? "")
-    }
-
-    var finalSequencesKeepSet: Set<String> {
-        Set(finalSequencesKeep ?? [])
-    }
-
-    var suffixesBreakVreSet: Set<String> {
-        Set(suffixesBreakVre ?? [])
-    }
-
-    var suffixesKeepVreSet: Set<String> {
-        Set(suffixesKeepVre ?? [])
-    }
+    // Multi-character entries are augmented with their full NFD decomposition,
+    // so entries with precomposed letters (deu "üh", grc "αἰ") still match
+    // when input has been NFD-normalised.
+    var clustersKeepNextSet: Set<String> { Self.augmentStrings(clustersKeepNext) }
+    var dontSplitDigraphsSet: Set<String> { Self.augmentStrings(dontSplitDigraphs) }
+    var digraphVowelsSet: Set<String> { Self.augmentStrings(digraphVowels) }
+    var clustersOnlyAfterLongSet: Set<String> { Self.augmentStrings(clustersOnlyAfterLong) }
+    var finalSequencesKeepSet: Set<String> { Self.augmentStrings(finalSequencesKeep) }
+    var suffixesBreakVreSet: Set<String> { Self.augmentStrings(suffixesBreakVre) }
+    var suffixesKeepVreSet: Set<String> { Self.augmentStrings(suffixesKeepVre) }
 
     var allChars: Set<Character> {
         vowelSet.union(consonantSet)
+    }
+
+    private static func augmentChars(_ source: String) -> Set<Character> {
+        var result = Set<Character>()
+        for char in source {
+            result.insert(char)
+            // NFD decomposition: keep the base letter, drop combining marks
+            // — those are handled by the tokenizer's Mn auto-attach.
+            for scalar in String(char).decomposedStringWithCanonicalMapping.unicodeScalars
+                where scalar.properties.generalCategory != .nonspacingMark {
+                result.insert(Character(scalar))
+            }
+        }
+        return result
+    }
+
+    private static func augmentStrings(_ source: [String]?) -> Set<String> {
+        guard let entries = source else { return [] }
+        var result = Set<String>(minimumCapacity: entries.count * 2)
+        for entry in entries {
+            result.insert(entry)
+            result.insert(entry.decomposedStringWithCanonicalMapping)
+        }
+        return result
     }
 
     // Additional property for unique chars (will be set by MetaRule)
@@ -161,47 +145,50 @@ struct LanguageRule: Codable, Sendable {
         guard let geminates = geminateDigraphs, !geminates.isEmpty else {
             return (word, [])
         }
-        let patterns = geminates.sorted { $0.key.count > $1.key.count }
-        let wordChars = Array(word)
-        let wordLower = word.lowercased()
-        let lowerChars = Array(wordLower)
+        // Iterate at Unicode scalar level so the resulting span positions
+        // line up with what the Tokenizer (also scalar-based) sees.
+        let wordScalars = Array(word.unicodeScalars)
+        let lowerScalars = Array(word.lowercased().unicodeScalars)
+        let patterns = geminates.sorted { Array($0.key.unicodeScalars).count > Array($1.key.unicodeScalars).count }
         var result = ""
         var spans: [GeminateSpan] = []
         var i = 0
         var expandedPos = 0
-        while i < wordChars.count {
+        while i < wordScalars.count {
             var matched = false
             for (short, long) in patterns {
-                let shortLen = short.count
-                if i + shortLen <= wordChars.count {
-                    let candidate = String(lowerChars[i..<(i + shortLen)])
-                    if candidate == short {
-                        let originalCompact = String(wordChars[i..<(i + shortLen)])
-                        let expansion: String
-                        if originalCompact == originalCompact.uppercased() {
-                            expansion = long.uppercased()
-                        } else if originalCompact.first?.isUppercase == true {
-                            let head = long.prefix(1).uppercased()
-                            let tail = long.dropFirst().lowercased()
-                            expansion = head + tail
-                        } else {
-                            expansion = long
-                        }
-                        spans.append(GeminateSpan(
-                            start: expandedPos,
-                            length: expansion.count,
-                            compactOriginal: originalCompact
-                        ))
-                        result += expansion
-                        expandedPos += expansion.count
-                        i += shortLen
-                        matched = true
-                        break
-                    }
+                let shortScalars = Array(short.unicodeScalars)
+                let shortLen = shortScalars.count
+                if i + shortLen > wordScalars.count { continue }
+                let candidate = String(String.UnicodeScalarView(lowerScalars[i..<(i + shortLen)]))
+                if candidate != short { continue }
+                let originalCompact = String(String.UnicodeScalarView(wordScalars[i..<(i + shortLen)]))
+                let expansion: String
+                if originalCompact == originalCompact.uppercased() {
+                    expansion = long.uppercased()
+                } else if originalCompact.first?.isUppercase == true {
+                    let head = long.prefix(1).uppercased()
+                    let tail = long.dropFirst().lowercased()
+                    expansion = head + tail
+                } else {
+                    expansion = long
                 }
+                let expansionLength = Array(expansion.unicodeScalars).count
+                spans.append(
+                    GeminateSpan(
+                        start: expandedPos,
+                        length: expansionLength,
+                        compactOriginal: originalCompact
+                    )
+                )
+                result += expansion
+                expandedPos += expansionLength
+                i += shortLen
+                matched = true
+                break
             }
             if !matched {
-                result.append(wordChars[i])
+                result.append(Character(wordScalars[i]))
                 expandedPos += 1
                 i += 1
             }

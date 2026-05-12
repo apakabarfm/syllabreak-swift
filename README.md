@@ -19,6 +19,7 @@ This is a Swift port of [syllabreak-python](https://github.com/apakabarlabs/syll
 - 🇰🇿 Kazakh (`kaz`)
 - 🇰🇬 Kyrgyz (`kir`)
 - 🇬🇷 Modern Greek (`ell`)
+- 🏛️ Ancient Greek (`grc`)
 - 🇬🇪 Georgian (`kat`)
 - 🇭🇺 Hungarian (`hun`)
 - 🇩🇪 German (`deu`)
@@ -56,7 +57,7 @@ Swift Package Manager:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/apakabarlabs/syllabreak-swift", from: "0.9.0")
+    .package(url: "https://github.com/apakabarlabs/syllabreak-swift", from: "0.10.0")
 ]
 ```
 
