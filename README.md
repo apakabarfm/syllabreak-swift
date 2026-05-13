@@ -34,6 +34,7 @@ This is a Swift port of [syllabreak-python](https://github.com/apakabarlabs/syll
 - 🇳🇱 Dutch (`nld`)
 - 🇸🇪 Swedish (`swe`)
 - 🇰🇪 Swahili (`swh`)
+- 🇻🇳 Vietnamese (`vie`)
 - 🏛️ Latin (`lat`)
 
 ## Why syllabification isn't trivial
@@ -55,6 +56,7 @@ A few language-specific quirks the algorithm has to encode. Each one would other
 - **Dutch** — strict V-CV for one consonant, VC-CV for two consonants (`kas-teel`, `mees-ter`, `pis-tool`). Muta-cum-liquida (`br bl dr fr fl gr gl kr kl pr pl tr vr wr`) stays together (`pa-troon`, `a-tri-um`). In 3+ consonant clusters, s-onsets and `tj`/`sch` also keep with the next syllable (`ven-ster`, `ham-ster`, `in-dus-trie`, `pad-den-stoel`) — encoded via a new `trailing_onsets` field that only applies in this position. `ch` is a single phoneme; vowel digraphs and triphthongs (`aai ooi oei eeu ieu`) are single nuclei. Hiatus marked by diaeresis (`idee-ën`, `pa-ti-ënt`). Auto-detect caveat: no unique characters relative to German — pass `lang="nld"` explicitly.
 - **Swedish** — `enkonsonantsprincipen` per SAOL: one consonant moves to the next syllable, strict V-CV / VC-CV (`sko-la`, `kvin-na`, `vac-ker`, `män-nis-ka`, `Hel-sing-fors`). No native vowel digraphs. Phonetically conditioned exceptions (`/ŋ/`-`ng`, `/ɧ/`-`sk/sj/...`) and morphology-based `ordledsprincipen` for compounds (`glas-ögon`) are not encoded. Auto-detect: `å` routes cleanly to Swedish; `ä`/`ö`-only words collide with German/Dutch/Finnish — pass `lang="swe"` explicitly.
 - **Swahili (Kiswahili)** — Bantu CV syllables. Prenasalized consonant digraphs `mb nd nj ng mv nz` and the palatal nasal `ny` count as single onsets (`mbu-zi`, `ja-mbo`, `nji-a`, `nyu-mba`). Word-initial `m`/`n` before a non-prenasalising consonant forms its own syllable (`m-to-to`, `n-chi`, `m-pi-shi`). Glide clusters `mw/my` and other `Cw/Cy` (sw, kw, bw, pw, ...) stay with the following vowel (`mwa-na`, `Ki-swa-hi-li`, `bwa-na`). Auto-detect: plain ASCII — pass `lang="swh"` explicitly.
+- **Vietnamese** — Latin alphabet with rich diacritics (12 base vowels × 6 tone variants = 72 precomposed forms, enumerated for autodetect). Consonant digraphs `ch gh gi kh ng ngh nh ph qu th tr` recognised. Vowel di- and triphthongs listed in **base-stripped** form (`uoi`, `ieu`, `yeu`, ...) so the tokenizer's Mn-skip path matches across diacritic runs — `người`, `nhiều`, `tuổi`, `yêu` all syllabify as one nucleus. The letter `đ` listed explicitly.
 - **Modern Greek** — V-CV; consonant clusters keep with the following nucleus up to length 3 if they form a valid Greek onset (`βι-βλί-ο`, `ά-στρο`, `συ-γκρί-νω`). Vowel digraphs αι/ει/οι/υι/αυ/ευ/ηυ/ου in all accent positions; consonant digraphs μπ/ντ/γκ/γγ/τζ/τσ as one consonant. Orthographic policy — synizesis is NOT applied.
 - **BCMS** — syllabic `r` between consonants is a syllable nucleus: `prst` and `krv` are one syllable.
 - **Georgian** — no digraphs; consonant sequences split unless on a small whitelist of valid onsets.
@@ -67,7 +69,7 @@ Swift Package Manager:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/apakabarlabs/syllabreak-swift", from: "0.15.0")
+    .package(url: "https://github.com/apakabarlabs/syllabreak-swift", from: "0.16.0")
 ]
 ```
 

@@ -103,9 +103,32 @@ class Tokenizer {
     }
 
     private func tryMatchDigraph(source: Set<String>, tokenClass: TokenClass) -> Bool {
-        // Direct substring match (catches entries whose marks sit on a
-        // vowel that is part of the digraph itself, e.g. deu "üh").
+        // For each candidate length (3, 2, 1) try the Mn-skipping match
+        // first, then the direct substring match. The Mn-skip path
+        // composes the next N base letters skipping combining marks, so
+        // it can cover more codepoints than a direct length-N substring
+        // — necessary for Vietnamese triphthongs like yêu (y + ê + u),
+        // where Mn-skip-3 matches the "yeu" base entry across 4
+        // codepoints, while direct-3 would catch the shorter "ye◌̂"
+        // first.
+        //
+        // The direct path is kept as a fallback within each length for
+        // entries whose marks sit on a vowel that participates in the
+        // digraph itself (German "üh" = u + ◌̈ + h).
+        let positions = scanBases()
+        let bases = positions.isEmpty ? [] : basesAtPositions(positions)
         for length in [3, 2, 1] {
+            if bases.count >= length {
+                let candidate = bases.prefix(length).map(String.init).joined()
+                if source.contains(candidate) {
+                    let end = positions[length - 1]
+                    if !diaeresisVetoesAt(end) {
+                        addDigraphToken(end: end, tokenClass: tokenClass)
+                        pos = end
+                        return true
+                    }
+                }
+            }
             let end = pos + length
             if end > scalars.count {
                 continue
@@ -116,27 +139,6 @@ class Tokenizer {
                 pos = end
                 return true
             }
-        }
-
-        // Mn-skipping fallback (catches breath/accent between two base
-        // letters of a diphthong, e.g. Greek "ἀι" = α + U+0313 + ι).
-        let positions = scanBases()
-        if positions.isEmpty {
-            return false
-        }
-        let bases = basesAtPositions(positions)
-        for length in [3, 2, 1] where bases.count >= length {
-            let candidate = bases.prefix(length).map(String.init).joined()
-            if !source.contains(candidate) {
-                continue
-            }
-            let end = positions[length - 1]
-            if diaeresisVetoesAt(end) {
-                continue
-            }
-            addDigraphToken(end: end, tokenClass: tokenClass)
-            pos = end
-            return true
         }
         return false
     }
