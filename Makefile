@@ -25,5 +25,7 @@ install:
 
 sync-yaml:
 	cp $(PYTHON_DATA_DIR)/rules.yaml $(SWIFT_RESOURCES_DIR)/
+	cp $(PYTHON_DATA_DIR)/word_split_rules.yaml $(SWIFT_RESOURCES_DIR)/
 	cp $(PYTHON_DATA_DIR)/syllabify_tests.yaml $(SWIFT_TEST_RESOURCES_DIR)/
 	cp $(PYTHON_DATA_DIR)/detect_language_tests.yaml $(SWIFT_TEST_RESOURCES_DIR)/
+	cp $(PYTHON_DATA_DIR)/word_split_tests.yaml $(SWIFT_TEST_RESOURCES_DIR)/
