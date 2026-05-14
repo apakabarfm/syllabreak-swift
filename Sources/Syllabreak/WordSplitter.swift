@@ -60,11 +60,24 @@ public final class WordSplitter: Sendable {
     }
 
     public func split(_ text: String, lang: String) -> [String] {
+        let nsText = text as NSString
+        return findNSRanges(text, lang: lang).map { nsText.substring(with: $0) }
+    }
+
+    /// Word ranges expressed as Swift `Range<String.Index>` — needed by clients
+    /// that highlight or annotate positions in the original text (e.g. iOS
+    /// lexeme spans), where re-searching the surface form would be ambiguous
+    /// on repeats ("the cat sat on the mat").
+    public func findRanges(_ text: String, lang: String) -> [Range<String.Index>] {
+        findNSRanges(text, lang: lang).compactMap { Range($0, in: text) }
+    }
+
+    private func findNSRanges(_ text: String, lang: String) -> [NSRange] {
         let regex = modes[lang] == "cjk" ? cjkRegex : defaultRegex
         let nsText = text as NSString
         let matches = regex.matches(
             in: text, range: NSRange(location: 0, length: nsText.length)
         )
-        return matches.map { nsText.substring(with: $0.range) }
+        return matches.map { $0.range }
     }
 }
