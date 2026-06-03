@@ -18,7 +18,6 @@ struct LanguageRule: Codable, Sendable {
     let glides: String?
     let syllabicConsonants: String?
     let modifiersAttachLeft: String?
-    let modifiersAttachRight: String?
     let modifiersSeparators: String?
     let clustersOnlyAfterLong: [String]?
     let splitHiatus: Bool?
@@ -52,7 +51,6 @@ struct LanguageRule: Codable, Sendable {
     var glideSet: Set<Character> { Self.augmentChars(glides ?? "") }
     var syllabicConsonantSet: Set<Character> { Self.augmentChars(syllabicConsonants ?? "") }
     var modifiersAttachLeftSet: Set<Character> { Self.augmentChars(modifiersAttachLeft ?? "") }
-    var modifiersAttachRightSet: Set<Character> { Self.augmentChars(modifiersAttachRight ?? "") }
     var modifiersSeparatorsSet: Set<Character> { Self.augmentChars(modifiersSeparators ?? "") }
     var finalSemivowelsSet: Set<Character> { Self.augmentChars(finalSemivowels ?? "") }
 
@@ -111,7 +109,6 @@ struct LanguageRule: Codable, Sendable {
         case glides
         case syllabicConsonants = "syllabic_consonants"
         case modifiersAttachLeft = "modifiers_attach_left"
-        case modifiersAttachRight = "modifiers_attach_right"
         case modifiersSeparators = "modifiers_separators"
         case clustersOnlyAfterLong = "clusters_only_after_long"
         case splitHiatus = "split_hiatus"
