@@ -10,9 +10,55 @@ class Tokenizer {
     private static let combiningDiaeresis: Unicode.Scalar = "\u{0308}"
 
     init(word: String, rule: LanguageRule) {
-        self.wordScalars = Array(word.unicodeScalars)
-        self.scalars = Array(word.lowercased().unicodeScalars)
+        let recomposed = Self.recomposeCategoryFlips(word, rule: rule)
+        self.wordScalars = Array(recomposed.unicodeScalars)
+        self.scalars = Array(recomposed.lowercased().unicodeScalars)
         self.rule = rule
+    }
+
+    /// Classify a single letter as vowel or consonant, or nil if unknown.
+    private static func classifyLetter(_ char: Character, rule: LanguageRule) -> TokenClass? {
+        if rule.vowelSet.contains(char) {
+            return .vowel
+        }
+        if rule.consonantSet.contains(char) || rule.glideSet.contains(char) || rule.sonorantSet.contains(char) {
+            return .consonant
+        }
+        return nil
+    }
+
+    /// Recompose base+combining-mark runs that NFC into a single declared
+    /// letter whose category differs from the bare NFD base. Russian й = и
+    /// (vowel) + combining breve composes back to the consonant й; left
+    /// decomposed, the vowel base и is wrongly read as a syllable nucleus
+    /// (мой -> мо-й) or absorbed into a long-vowel digraph (Kyrgyz ии: кийиз
+    /// -> кийиз). Greek accented vowels (same class) and Montenegrin с́ (no
+    /// precomposed form) are untouched.
+    private static func recomposeCategoryFlips(_ word: String, rule: LanguageRule) -> String {
+        let scalars = Array(word.unicodeScalars)
+        var result = String.UnicodeScalarView()
+        var i = 0
+        while i < scalars.count {
+            var end = i + 1
+            while end < scalars.count && isNonspacingMark(scalars[end]) {
+                end += 1
+            }
+            if end > i + 1 {
+                let composed = String(String.UnicodeScalarView(scalars[i..<end])).precomposedStringWithCanonicalMapping
+                if composed.unicodeScalars.count == 1 {
+                    let baseClass = classifyLetter(Character(String(scalars[i]).lowercased()), rule: rule)
+                    let composedClass = classifyLetter(Character(composed.lowercased()), rule: rule)
+                    if composedClass != nil && composedClass != baseClass {
+                        result.append(contentsOf: composed.unicodeScalars)
+                        i = end
+                        continue
+                    }
+                }
+            }
+            result.append(scalars[i])
+            i += 1
+        }
+        return String(result)
     }
 
     func tokenize() -> [Token] {
@@ -206,25 +252,13 @@ class Tokenizer {
     }
 
     private func addSingleCharacterToken() {
-        let scalar = scalars[pos]
-        let char = Character(scalar)
-
-        let tokenClass: TokenClass
-        var isGlide = false
-
-        if rule.vowelSet.contains(char) {
-            tokenClass = .vowel
-        } else if rule.consonantSet.contains(char) || rule.glideSet.contains(char) || rule.sonorantSet.contains(char) {
-            tokenClass = .consonant
-            isGlide = rule.glideSet.contains(char)
-        } else {
-            tokenClass = .other
-        }
-
+        let char = charAtLower(pos)
+        let tokenClass = Self.classifyLetter(char, rule: rule)
+        let isGlide = tokenClass == .consonant && rule.glideSet.contains(char)
         tokens.append(
             Token(
                 surface: surface(start: pos, end: pos + 1),
-                tokenClass: tokenClass,
+                tokenClass: tokenClass ?? .other,
                 isGlide: isGlide,
                 startIdx: pos,
                 endIdx: pos + 1
