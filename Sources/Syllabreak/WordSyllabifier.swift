@@ -168,6 +168,19 @@ class WordSyllabifier {
         return extractConsonantCluster(left: left, right: right)
     }
 
+    private func findSeparatorBetween(nk: Int, nk1: Int) -> Int? {
+        // A separator (Russian hard sign ъ) marks a morpheme boundary: the
+        // preceding consonant is the coda of the previous syllable and the
+        // separator + iotated vowel open the next one (об-ъект, под-ъезд,
+        // из-ъян). The boundary falls on the separator itself, overriding the
+        // usual onset-cluster rule that would move the lone consonant to the
+        // next syllable (о-бъект).
+        for i in (nk + 1)..<nk1 where tokens[i].tokenClass == .separator {
+            return i
+        }
+        return nil
+    }
+
     private func isValidOnset(
         _ consonant1: String,
         _ consonant2: String,
@@ -358,6 +371,10 @@ class WordSyllabifier {
         var boundaries: [Int] = []
 
         for k in 0..<(nuclei.count - 1) {
+            if let separatorIdx = findSeparatorBetween(nk: nuclei[k], nk1: nuclei[k + 1]) {
+                boundaries.append(separatorIdx)
+                continue
+            }
             let (cluster, clusterIndices) = findClusterBetweenNuclei(nk: nuclei[k], nk1: nuclei[k + 1])
             if let boundary = findBoundaryInCluster(cluster, clusterIndices, nuclei[k], nuclei[k + 1]) {
                 boundaries.append(boundary)
