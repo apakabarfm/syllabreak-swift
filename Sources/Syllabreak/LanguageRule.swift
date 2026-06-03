@@ -16,6 +16,7 @@ struct LanguageRule: Codable, Sendable {
     let dontSplitDigraphs: [String]?
     let digraphVowels: [String]?
     let glides: String?
+    let vowelGlides: String?
     let syllabicConsonants: String?
     let modifiersAttachLeft: String?
     let modifiersSeparators: String?
@@ -49,6 +50,7 @@ struct LanguageRule: Codable, Sendable {
     var consonantSet: Set<Character> { Self.augmentChars(consonants) }
     var sonorantSet: Set<Character> { Self.augmentChars(sonorants) }
     var glideSet: Set<Character> { Self.augmentChars(glides ?? "") }
+    var vowelGlideSet: Set<Character> { Self.augmentChars(vowelGlides ?? "") }
     var syllabicConsonantSet: Set<Character> { Self.augmentChars(syllabicConsonants ?? "") }
     var modifiersAttachLeftSet: Set<Character> { Self.augmentChars(modifiersAttachLeft ?? "") }
     var modifiersSeparatorsSet: Set<Character> { Self.augmentChars(modifiersSeparators ?? "") }
@@ -107,6 +109,7 @@ struct LanguageRule: Codable, Sendable {
         case dontSplitDigraphs = "dont_split_digraphs"
         case digraphVowels = "digraph_vowels"
         case glides
+        case vowelGlides = "vowel_glides"
         case syllabicConsonants = "syllabic_consonants"
         case modifiersAttachLeft = "modifiers_attach_left"
         case modifiersSeparators = "modifiers_separators"

@@ -9,7 +9,7 @@ enum TokenClass {
 
 struct Token {
     var surface: String
-    let tokenClass: TokenClass
+    var tokenClass: TokenClass
     var isGlide: Bool = false
     var isModifier: Bool = false
     let startIdx: Int

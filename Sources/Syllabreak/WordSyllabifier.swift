@@ -16,13 +16,39 @@ class WordSyllabifier {
         self.geminateSpans = spans
         self.rule = rule
         self.softHyphen = softHyphen
-        self.tokens = WordSyllabifier.tokenize(word: expanded, rule: rule)
+        let rawTokens = WordSyllabifier.tokenize(word: expanded, rule: rule)
+        self.tokens = WordSyllabifier.reclassifyVowelGlides(tokens: rawTokens, rule: rule)
         self.nuclei = WordSyllabifier.findNuclei(tokens: tokens, rule: rule)
     }
 
     private static func tokenize(word: String, rule: LanguageRule) -> [Token] {
         let tokenizer = Tokenizer(word: word, rule: rule)
         return tokenizer.tokenize()
+    }
+
+    private static func reclassifyVowelGlides(tokens: [Token], rule: LanguageRule) -> [Token] {
+        // Kazakh у/и are a syllable nucleus after a consonant (ту-ыс, ки-ім,
+        // су-лу) but a glide consonant after a vowel (да-уа, not да-у-а; а-уа).
+        // Retag a single vowel-glide token to consonant when the previous
+        // non-separator token is a vowel. Long-vowel digraphs (Kyrgyz уу/ии)
+        // tokenise as one multi-character VOWEL token and are left untouched.
+        let vowelGlides = rule.vowelGlideSet
+        if vowelGlides.isEmpty {
+            return tokens
+        }
+        var result = tokens
+        for i in result.indices where result[i].tokenClass == .vowel {
+            let lower = result[i].surface.lowercased()
+            guard lower.count == 1, let ch = lower.first, vowelGlides.contains(ch) else { continue }
+            var prev = i - 1
+            while prev >= 0 && result[prev].tokenClass == .separator {
+                prev -= 1
+            }
+            if prev >= 0 && result[prev].tokenClass == .vowel {
+                result[i].tokenClass = .consonant
+            }
+        }
+        return result
     }
 
     private static func findNuclei(tokens: [Token], rule: LanguageRule) -> [Int] {
