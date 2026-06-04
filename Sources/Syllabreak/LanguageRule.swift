@@ -4,7 +4,6 @@ struct LanguageRule: Codable, Sendable {
     let lang: String
     let vowels: String
     let consonants: String
-    let sonorants: String
     let clustersKeepNext: [String]?
     // trailing_onsets — onsets valid ONLY in trailing position of a 3+
     // consonant cluster. Used for Dutch where s+stop splits as VC-CV in
@@ -48,7 +47,6 @@ struct LanguageRule: Codable, Sendable {
     // the base letter that the YAML lists in precomposed form.
     var vowelSet: Set<Character> { Self.augmentChars(vowels) }
     var consonantSet: Set<Character> { Self.augmentChars(consonants) }
-    var sonorantSet: Set<Character> { Self.augmentChars(sonorants) }
     var glideSet: Set<Character> { Self.augmentChars(glides ?? "") }
     var vowelGlideSet: Set<Character> { Self.augmentChars(vowelGlides ?? "") }
     var syllabicConsonantSet: Set<Character> { Self.augmentChars(syllabicConsonants ?? "") }
@@ -103,7 +101,6 @@ struct LanguageRule: Codable, Sendable {
         case lang
         case vowels
         case consonants
-        case sonorants
         case clustersKeepNext = "clusters_keep_next"
         case trailingOnsets = "trailing_onsets"
         case dontSplitDigraphs = "dont_split_digraphs"

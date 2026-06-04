@@ -21,7 +21,7 @@ class Tokenizer {
         if rule.vowelSet.contains(char) {
             return .vowel
         }
-        if rule.consonantSet.contains(char) || rule.glideSet.contains(char) || rule.sonorantSet.contains(char) {
+        if rule.consonantSet.contains(char) || rule.glideSet.contains(char) {
             return .consonant
         }
         return nil
