@@ -14,7 +14,6 @@ struct LanguageRule: Codable, Sendable {
     let trailingOnsets: [String]?
     let dontSplitDigraphs: [String]?
     let digraphVowels: [String]?
-    let glides: String?
     let vowelGlides: String?
     let syllabicConsonants: String?
     let modifiersAttachLeft: String?
@@ -47,7 +46,6 @@ struct LanguageRule: Codable, Sendable {
     // the base letter that the YAML lists in precomposed form.
     var vowelSet: Set<Character> { Self.augmentChars(vowels) }
     var consonantSet: Set<Character> { Self.augmentChars(consonants) }
-    var glideSet: Set<Character> { Self.augmentChars(glides ?? "") }
     var vowelGlideSet: Set<Character> { Self.augmentChars(vowelGlides ?? "") }
     var syllabicConsonantSet: Set<Character> { Self.augmentChars(syllabicConsonants ?? "") }
     var modifiersAttachLeftSet: Set<Character> { Self.augmentChars(modifiersAttachLeft ?? "") }
@@ -105,7 +103,6 @@ struct LanguageRule: Codable, Sendable {
         case trailingOnsets = "trailing_onsets"
         case dontSplitDigraphs = "dont_split_digraphs"
         case digraphVowels = "digraph_vowels"
-        case glides
         case vowelGlides = "vowel_glides"
         case syllabicConsonants = "syllabic_consonants"
         case modifiersAttachLeft = "modifiers_attach_left"

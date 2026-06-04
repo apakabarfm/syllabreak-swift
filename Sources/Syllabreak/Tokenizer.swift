@@ -21,7 +21,7 @@ class Tokenizer {
         if rule.vowelSet.contains(char) {
             return .vowel
         }
-        if rule.consonantSet.contains(char) || rule.glideSet.contains(char) {
+        if rule.consonantSet.contains(char) {
             return .consonant
         }
         return nil
@@ -190,18 +190,10 @@ class Tokenizer {
     }
 
     private func addDigraphToken(end: Int, tokenClass: TokenClass) {
-        let isGlide: Bool
-        if tokenClass == .vowel {
-            let scalarSlice = scalars[pos..<end]
-            isGlide = scalarSlice.contains { rule.glideSet.contains(Character($0)) }
-        } else {
-            isGlide = false
-        }
         tokens.append(
             Token(
                 surface: surface(start: pos, end: end),
                 tokenClass: tokenClass,
-                isGlide: isGlide,
                 startIdx: pos,
                 endIdx: end
             )
@@ -254,12 +246,10 @@ class Tokenizer {
     private func addSingleCharacterToken() {
         let char = charAtLower(pos)
         let tokenClass = Self.classifyLetter(char, rule: rule)
-        let isGlide = tokenClass == .consonant && rule.glideSet.contains(char)
         tokens.append(
             Token(
                 surface: surface(start: pos, end: pos + 1),
                 tokenClass: tokenClass ?? .other,
-                isGlide: isGlide,
                 startIdx: pos,
                 endIdx: pos + 1
             )

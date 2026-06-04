@@ -10,7 +10,6 @@ enum TokenClass {
 struct Token {
     var surface: String
     var tokenClass: TokenClass
-    var isGlide: Bool = false
     var isModifier: Bool = false
     let startIdx: Int
     var endIdx: Int
