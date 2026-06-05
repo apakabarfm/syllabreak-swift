@@ -78,7 +78,7 @@ Swift Package Manager:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/apakabarlabs/syllabreak-swift", from: "0.16.1")
+    .package(url: "https://github.com/apakabarlabs/syllabreak-swift", from: "0.19.0")
 ]
 ```
 
